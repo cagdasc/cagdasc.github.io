@@ -110,23 +110,63 @@ content:
           * Good Understanding of technical as well as functional J2EE/ DevOps/ Prod Support.
           * Participated within an Agile/Scrum team, extensive hands on experience with quality assurance methods.
           * Developing various digital projects as working closely with business units, UX & UI designers.
+  - title: Side Projects
+    layout: list
+    content:
+      - layout: top
+        title: Zaytungcu
+        sub_title: Android Application
+        quote: >
+          One of the most popular satirical news page zaytung.com’s Android application implementation.
+        description: |
+          * Pure Kotlin
+          * MVVM Architecture
+          * Android Architecture Components
+          * Coroutine, Retrofit, Hilt, LiveData, Reactive Programming with flows
+          * Firebase Integration
+          * Unit and Espresso Tests
+      - layout: top
+        title: Rock Bird
+        sub_title: Mobile Game
+        description: |
+          * 2D Arcade Game.
+          * Built in Godot Engine.
+          * Firebase Integration both iOS and Android
   - title: Education
     layout: list
     content:
-      - layout: top-left
+      - layout: top
         title: Yıldız Technical University
         sub_title: Computer Engineering
         caption: 2010 - 2016
-        #quote: >
-        #  Short institution or course description (optional)
-        #description: | # this will include new lines to allow paragraphs
-        #  Description of qualification
-  #- title: A Little More About Me
-  #  layout: text
-  #  content: | # this will include new lines to allow paragraphs
-  #    This is where you can write a little more about yourself. You could title this section **Interests** and include some of your other interests.
-#
-  #    Or you could title it **Skills** and write a bit more about things that make you more desirable, like *leadership* or *teamwork*
+  - title: Skills
+    layout: list
+    content:
+      - layout: top
+        title: Programming Languages
+        description: |
+          * Kotlin
+          * Java
+          * Swift
+          * Javascript
+      - layout: top
+        title: Mobile Platforms
+        description: |
+          * Android
+          * iOS
+      - layout: top
+        title: Web
+        description: |
+          * SpringBoot
+          * Spring MVC
+          * OpenShift
+      - layout: top
+        title: Social
+        description: |
+          * Excellent communication skills, both verbal and written
+          * Strong organizational and communication skills
+          * Community of Practice organizer
+
 
 # Footer
 footer_show_references: true
