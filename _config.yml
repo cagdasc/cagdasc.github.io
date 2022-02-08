@@ -52,7 +52,7 @@ google_analytics: "302747161"
 # about_title: About Me (Use this to override about section title)
 about_profile_image: images/pp.jpeg
 about_content: | # this will include new lines to allow paragraphs
-  I am a self‑motivated and solution focused developer who is interested in state‑of‑the‑art technologies and who has a passion for problem‑solving. Additionally, free open source software development has a special place in my heart. I am currently working at Meditopia which is the world’s most popular mental wellness platform for non-English speakers. My work description is developing Meditopia Mobile application for Android. When I am not working in my main field, I take an interest in game development and contributing open‑source projects, which occupies my free time.
+  I am a self‑motivated and solution focused developer who is interested in state‑of‑the‑art technologies and who has a passion for problem‑solving. Additionally, free open source software development has a special place in my heart. I am currently working at Meditopia which is the world’s most popular mental wellness platform for non-English speakers. My work description is developing Meditopia Mobile application for Android. Besides my main field, I have an interest in game development and open-source projects which I like to spend my free time on.
 
 content:
   #- title: Projects # Title for the section
@@ -138,7 +138,7 @@ content:
       - layout: top
         title: Yıldız Technical University
         sub_title: Computer Engineering
-        caption: 2010 - 2016
+        caption: 2010 - 2015
   - title: Skills
     layout: list
     content:
