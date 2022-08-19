@@ -52,7 +52,7 @@ google_analytics: "302747161"
 # about_title: About Me (Use this to override about section title)
 about_profile_image: images/pp.jpeg
 about_content: | # this will include new lines to allow paragraphs
-  I am a self‑motivated and solution focused developer who is interested in state‑of‑the‑art technologies and who has a passion for problem‑solving. Additionally, free open source software development has a special place in my heart. I am currently working at Meditopia which is the world’s most popular mental wellness platform for non-English speakers. My work description is developing Meditopia Mobile application for Android. Besides my main field, I have an interest in game development and open-source projects which I like to spend my free time on.
+  I am a self‑motivated and solution focused developer who is interested in state‑of‑the‑art technologies and who has a passion for problem‑solving. Additionally, free open source software development has a special place in my heart. I am currently working at Meditopia which is the world’s most popular mental wellness platform for non-English speakers. My work description is developing Meditopia Mobile application for Android. When I am not working in my main field, I take an interest in contributing open‑source projects, which occupies my free time.
 
 content:
   #- title: Projects # Title for the section
@@ -84,13 +84,16 @@ content:
         quote: >
           The world’s most popular mental wellness platform for non-English speakers.
         description: | # this will include new lines to allow paragraphs
-          * Developing ”Meditopia” Android applications, maintaining and integrating new technologies
-          * Taking key roles at scaling "Meditopia" application to millions of users on Android platforms.
+          * Taking key roles at scaling “Meditopia” application to millions of users on Android platforms
+          * Developing ”Meditopia” Android applications, maintaining and integrating new technologies.
+          * Taking advantage of declarative UI development with Jetpack Compose.
           * Taking advantage of functional programming by using Kotlin programming languages.
-          * Technical proficiency in SVN (Subversion), Git, and artifact repository tools.
+          * Implemented Clean Architecture using Hilt and Kotlin Flow.
+          * Working on Android Media infrastructure and implemented media content using ExoPlayer.
+          * Determined architectural and product design details for open-ended tasks or specifications.
+          * Collaborated with quality engineers, user research, product management, design, and support teams to ensure quality in all phases of app development.
           * Comprehensive experience in the design and implementation of Continuous Integration, Continuous Deployment Continuous Delivery and DevOps Operations.
-          * Participated within an Agile/Scrum team, extensive hands on experience with quality assurance methods.
-          * Developing various digital projects as working closely with business units, UX & UI designers.
+          * Participated within an Agile/Scrum team as a Scrum Master, extensive hands on experience with quality assurance methods.
       - layout: right
         title: Garanti BBVA Mobile
         sub_title: Expert Software Developer
@@ -99,17 +102,13 @@ content:
         quote: >
           Garanti BBVA Technology is one of the biggest banking infrastructure companies in Turkey.
         description: | # this will include new lines to allow paragraphs
-          * Developing ”Garanti BBVA Mobile” Android and iOS applications, maintaining and integrating new technologies
-          * Taking key roles at scaling “Garanti BBVA Mobile” application to millions of users on both iOS and Android platforms.
-          * Developing UGI which AI based customer assistants in ”Garanti BBVA Mobile”.
-          * Taking advantage of functional programming by using Swift and Kotlin programming languages.
-          * Developing financial services with Spring-Boot framework and container based technologies like Docker, Kubernetes and Openshift.
-          * Technical proficiency in SVN (Subversion), Git, and artifact repository tools.
-          * Creating plugins and development tools for improve development time.
-          * Comprehensive experience in the design and implementation of Continuous Integration, Continuous Deployment Continuous Delivery and DevOps Operations.
-          * Good Understanding of technical as well as functional J2EE/ DevOps/ Prod Support.
-          * Participated within an Agile/Scrum team, extensive hands on experience with quality assurance methods.
-          * Developing various digital projects as working closely with business units, UX & UI designers.
+          * Developing "Garanti BBVA Mobile" Android application, maintaining and integrating new technologies.
+          * Fulfilling key roles at scaling “Garanti BBVA Mobile” application to millions of users on Android platforms.
+          * Developing an AI based customer assistants to increase the accessibility of application features.
+          * Taking advantage of functional programming by using Kotlin programming languages.
+          * Creating IDE plugins and development tools to improve development time.
+          * Comprehensive experience in the design and implementation of Continuous Integration, Continuous Deployment, Continuous Delivery and DevOps Operations.
+          * Participated within an Agile/Scrum team as a Scrum Master, extensive hands on experience with quality assurance methods.
   - title: Side Projects
     layout: list
     content:
@@ -119,12 +118,11 @@ content:
         quote: >
           One of the most popular satirical news page zaytung.com’s Android application implementation.
         description: |
-          * Pure Kotlin
+          * Kotlin
           * MVVM Architecture
           * Android Architecture Components
-          * Coroutine, Retrofit, Hilt, LiveData, Reactive Programming with flows
-          * Firebase Integration
-          * Unit and Espresso Tests
+          * Flow API, Kotlin Coroutine, Hilt, Retrofit
+          * Firebase Integration, Unit Tests, UI Tests
       - layout: top
         title: Rock Bird
         sub_title: Mobile Game
@@ -147,19 +145,13 @@ content:
         description: |
           * Kotlin
           * Java
-          * Swift
-          * Javascript
       - layout: top
-        title: Mobile Platforms
+        title: Technology
         description: |
-          * Android
-          * iOS
-      - layout: top
-        title: Web
-        description: |
-          * SpringBoot
-          * Spring MVC
-          * OpenShift
+          * Hilt
+          * Kotlin Flow
+          * Retrofit
+          * Jetpack Compose
       - layout: top
         title: Social
         description: |
