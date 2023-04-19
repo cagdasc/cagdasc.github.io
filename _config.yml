@@ -52,7 +52,7 @@ google_analytics: "302747161"
 # about_title: About Me (Use this to override about section title)
 about_profile_image: images/pp.jpeg
 about_content: | # this will include new lines to allow paragraphs
-  I am a self‑motivated and solution focused developer who is interested in state‑of‑the‑art technologies and who has a passion for problem‑solving. Additionally, free open source software development has a special place in my heart. I am currently working at Meditopia which is the world’s most popular mental wellness platform for non-English speakers. My work description is developing Meditopia Mobile application for Android. When I am not working in my main field, I take an interest in contributing open‑source projects, which occupies my free time.
+  I am a self‑motivated and solution focused developer who is interested in state‑of‑the‑art technologies and who has a passion for problem‑solving. Additionally, free open source software development has a special place in my heart. I am currently working for Nutmeg which is the largest digital wealth manager in the UK with 200k clients. My work description is building mobile application for Android. When I am not working in my main field, I take an interest in contributing open‑source projects, which occupies my free time.
 
 content:
   #- title: Projects # Title for the section
@@ -77,9 +77,23 @@ content:
     layout: list
     content:
       - layout: right
+        title: Nutmeg
+        sub_title: Senior Android Developer
+        caption: November 2022 - Present
+        #link: Link to company (optional)
+        quote: >
+          Nutmeg is the UK’s largest truly digital wealth manager, offering clarity and transparency to both seasoned and first-time investors as they seek to achieve their financial goals.
+        description: | # this will include new lines to allow paragraphs
+          * Taking key roles at scaling “Nutmeg” application to thousands of users on Android platforms
+          * Developing ”Nutmeg” Android applications, maintaining and integrating new technologies.
+          * Taking advantage of functional programming by using Kotlin programming languages.
+          * Implemented Clean Architecture using Dagger, Flow and RxJava.
+          * Determined architectural and product design details for open-ended tasks or specifications.
+          * Collaborated with quality engineers, user research, product management, design, and support teams to ensure quality in all phases of app development.
+      - layout: right
         title: Meditopia
         sub_title: Senior Android Developer
-        caption: November 2021 - Present
+        caption: November 2021 - November 2022
         #link: Link to company (optional)
         quote: >
           The world’s most popular mental wellness platform for non-English speakers.
