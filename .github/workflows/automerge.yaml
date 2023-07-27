@@ -31,7 +31,3 @@ jobs:
           UPDATE_LABELS: "ready"
           UPDATE_METHOD: "merge"
           BASE_BRANCHES: "dev"
-      - name: feedback
-        if: steps.automerge.outputs.mergeResult == "merged"
-        run: |
-          echo "Pull request ${{ steps.automerge.outputs.pullRequestNumber }} merged!"
