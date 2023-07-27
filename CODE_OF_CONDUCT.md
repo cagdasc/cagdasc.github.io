@@ -80,3 +80,4 @@ feature 1.4
 feature 1.5
 feature 1.6
 feature 1.7
+feature 1.8
