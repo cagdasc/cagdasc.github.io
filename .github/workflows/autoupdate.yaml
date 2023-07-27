@@ -1,9 +1,10 @@
 name: autoupdate
 on:
+  push: {}
   # This will trigger on all pushes to all branches.
-  push: 
-    branches:
-      - dev
+  # push: 
+  #   branches:
+  #     - dev
 jobs:
   autoupdate:
     name: autoupdate
