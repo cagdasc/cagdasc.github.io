@@ -43,3 +43,5 @@ As this is mostly templating we don't have many linting rules, but please
 
 ## License
 By contributing, you agree that your contributions will be licensed under its [MIT License](http://choosealicense.com/licenses/mit/).
+
+feature 2
