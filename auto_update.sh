@@ -7,7 +7,7 @@ function fetch_pull_requests() {
   local label="$1"
   echo "Fetching pull requests with label '$label'..."
   curl -s -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls?state=open&labels=$label" \
-    | jq -r '.[] | .number, .created_at'
+    | jq -r '.[] | "\(.number) \(.created_at)"'
 }
 
 # Function to check if a pull request has the IGNORE_LABEL
@@ -45,7 +45,9 @@ for label in "${update_labels[@]}"; do
 done
 
 pull_request_list=()
-while read -r pr_number && read -r created_at; do
+while read -r pr_info; do
+  pr_number=$(echo "$pr_info" | cut -d ' ' -f 1)
+  created_at=$(echo "$pr_info" | cut -d ' ' -f 2)
   if ! has_ignore_label "$pr_number" && [ "$(count_approvals "$pr_number")" -ge "$MIN_APPROVAL_COUNT" ]; then
     pull_request_list+=("$created_at $pr_number")
   fi
