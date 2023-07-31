@@ -26,5 +26,5 @@ jobs:
           IGNORE_LABEL: "inprogress"
           MIN_APPROVAL_COUNT: 1
         run: |
-          chmod +x ./auto_update.sh
-          ./auto_update.sh
+          chmod +x ./githu/workflows/auto_update.sh
+          ./githu/workflows/auto_update.sh
