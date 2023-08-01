@@ -6,11 +6,12 @@ import { orderBy } from 'lodash';
 
 async function run() {
   try {
-    const UPDATE_LABEL: string = getInput('UPDATE_LABEL', { required: true });
-    const IGNORED_LABELS: string = getInput('IGNORED_LABELS') || '';
-    const MIN_APPROVAL_COUNT: number = parseInt(getInput('MIN_APPROVAL_COUNT', { required: true }));
+    UPDATE_LABEL: string = process.env.UPDATE_LABEL;
+    IGNORED_LABELS: string = process.env.IGNORED_LABELS;
+    MIN_APPROVAL_COUNT: number = parseInt(process.env.MIN_APPROVAL_COUNT);
 
-    const octokit = getOctokit(process.env.GITHUB_TOKEN!);
+
+    const octokit = getOctokit(process.env.GITHUB_TOKEN);
     const { owner, repo } = context.repo;
 
     // Fetch all open pull requests
