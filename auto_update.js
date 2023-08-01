@@ -6,9 +6,9 @@ import { orderBy } from 'lodash';
 
 async function run() {
   try {
-    UPDATE_LABEL: string = process.env.UPDATE_LABEL!;
-    IGNORED_LABELS: string = process.env.IGNORED_LABELS!;
-    MIN_APPROVAL_COUNT: number = parseInt(process.env.MIN_APPROVAL_COUNT!);
+    UPDATE_LABEL: string = process.env.UPDATE_LABEL;
+    IGNORED_LABELS: string = process.env.IGNORED_LABELS;
+    MIN_APPROVAL_COUNT: number = parseInt(process.env.MIN_APPROVAL_COUNT);
 
 
     const octokit = getOctokit(process.env.GITHUB_TOKEN!);
