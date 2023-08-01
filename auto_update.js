@@ -11,7 +11,7 @@ async function run() {
     MIN_APPROVAL_COUNT: number = parseInt(process.env.MIN_APPROVAL_COUNT);
 
 
-    const octokit = getOctokit(process.env.GITHUB_TOKEN!);
+    const octokit = getOctokit(process.env.GITHUB_TOKEN);
     const { owner, repo } = context.repo;
 
     // Fetch all open pull requests
