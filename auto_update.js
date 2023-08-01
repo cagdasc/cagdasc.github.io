@@ -6,19 +6,10 @@ import { orderBy } from 'lodash';
 
 async function run() {
   try {
-    let UPDATE_LABEL: string = '';
-    let IGNORED_LABELS: string = '';
-    let MIN_APPROVAL_COUNT: number = 0;
+    const UPDATE_LABEL: string = process.env.UPDATE_LABEL!;
+    const IGNORED_LABELS: string = process.env.IGNORED_LABELS!;
+    const MIN_APPROVAL_COUNT: number = parseInt(process.env.MIN_APPROVAL_COUNT!);
 
-    try {
-      UPDATE_LABEL = getInput('UPDATE_LABEL', { required: true });
-      IGNORED_LABELS = getInput('IGNORED_LABELS') || '';
-      MIN_APPROVAL_COUNT = parseInt(getInput('MIN_APPROVAL_COUNT', { required: true }));
-    } catch (error) {
-      // Handle the error or provide default values if needed
-      console.error('Error occurred while fetching input parameters:', error);
-      process.exit(1);
-    }
 
     const octokit = getOctokit(process.env.GITHUB_TOKEN!);
     const { owner, repo } = context.repo;
