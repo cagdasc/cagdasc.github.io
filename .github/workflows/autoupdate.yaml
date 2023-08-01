@@ -1,26 +1,31 @@
-name: autoupdate
+name: PR Status Labeller
+
 on:
-  push: {}
-  # This will trigger on all pushes to all branches.
-  # push: 
-  #   branches:
-  #     - dev
+  pull_request:
+    types:
+      - labeled
+      - synchronize
+      - reopened
+  pull_request_review:
+    types:
+      - submitted
+
 jobs:
-  autoupdate:
-    name: autoupdate
-    runs-on: ubuntu-22.04
+  pr_status_labeller:
+    runs-on: ubuntu-latest
     steps:
-      - uses: docker://chinthakagodawita/autoupdate-action:v1
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Run PR Status Labeller
+        run: |
+          node auto_update.js
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          DRY_RUN: "false"
-          PR_FILTER: "labelled"
-          PR_LABELS: "ready"
-          PR_READY_STATE: "ready_for_review"
-          EXCLUDED_LABELS: "wip,inprogress,wontfix"
-          MERGE_MSG: "Branch was auto-updated."
-          RETRY_COUNT: "2"
-          RETRY_SLEEP: "300"
-          MERGE_CONFLICT_ACTION: "fail"
-      - run: echo 'Merge conflicts found!'
-        if: ${{ steps.autoupdate.outputs.conflicted }}
+          UPDATE_LABEL: "ready"
+          IGNORED_LABELS: "inprogress"
+          MIN_APPROVAL_COUNT: 1
