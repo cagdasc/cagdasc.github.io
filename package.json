@@ -1,0 +1,39 @@
+{
+  "name": "cacaosd.autoupdate",
+  "version": "1.0.0",
+  "type": "module", // Add this line
+   "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^5.3.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/node": "^16.0.0",
+    "typescript": "^4.4.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build"
+  },
+  "types": "dist/index.d.ts",
+  "keywords": ["github", "action"],
+  "githubAction": true,
+  "inputs": {
+    "UPDATE_LABEL": {
+      "required": true,
+      "type": "string",
+      "description": "The label that triggers the action to fetch and filter PRs."
+    },
+    "IGNORED_LABELS": {
+      "required": false,
+      "type": "string",
+      "description": "Comma-separated labels that will be ignored during filtering."
+    },
+    "MIN_APPROVAL_COUNT": {
+      "required": true,
+      "type": "number",
+      "description": "The minimum approval count required for a PR to pass the filter."
+    }
+  }
+}
