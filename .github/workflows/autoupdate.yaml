@@ -25,3 +25,7 @@ jobs:
       - name: Run PR Status Labeller
         run: |
           node auto_update.js
+        env:
+          UPDATE_LABEL: "ready"
+          IGNORED_LABELS: "inprogress"
+          MIN_APPROVAL_COUNT: 1
