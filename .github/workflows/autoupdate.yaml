@@ -1,30 +1,31 @@
-name: Auto Update
+name: PR Status Labeller
 
 on:
-  push:
-    branches:
-      - '*'
   pull_request:
-    types: [ labeled, synchronize ]
+    types:
+      - labeled
+      - synchronize
+      - reopened
   pull_request_review:
+    types:
+      - submitted
 
 jobs:
-  auto_update_pr_job:
+  pr_status_labeller:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14.x'
+          node-version: 14
 
-      - name: Run the Auto Update PR action
+      - name: Run PR Status Labeller
+        run: |
+          node auto_update.js
         env:
           UPDATE_LABEL: "ready"
-          IGNORE_LABEL: "inprogress"
+          IGNORED_LABELS: "inprogress"
           MIN_APPROVAL_COUNT: 1
-        run: |
-          chmod +x ./auto_update.sh
-          ./auto_update.sh
