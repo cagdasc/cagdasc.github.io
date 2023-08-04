@@ -33,7 +33,7 @@
     "MIN_APPROVAL_COUNT": {
       "required": true,
       "type": "number",
-      "description": "The minimum approval count required for a PR to pass the filter."
+      "description": "The minimum approval count required for a PR to pass the filter.aaaa"
     }
   }
 }
