@@ -1,0 +1,23 @@
+name: Trigger2
+on:
+  workflow_run:
+    workflows: ["Base Flow"]
+    types:
+      - completed
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run another action
+        uses: actions/checkout@v2  # Replace with the actual action you want to run
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Print a message
+        run: |
+          echo "Triggered2 workflow completed!"
