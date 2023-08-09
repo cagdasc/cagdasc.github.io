@@ -3,7 +3,7 @@ name: Merged Flow
 on:
   push:
     branches:
-      - dev
+      - 'dev'
 
   #pull_request:
     #branches: 
