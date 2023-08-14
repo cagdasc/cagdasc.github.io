@@ -19,4 +19,4 @@ jobs:
 
       - name: Print a message
         run: |
-          echo "Base workflow completed!"
+          echo "Base workflow completed! ${{ vars.AUTO_UPDATE_KILL }}"
