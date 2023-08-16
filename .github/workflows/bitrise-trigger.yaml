@@ -4,9 +4,7 @@ on:
   check_suite:
     types:
       - completed
-    # Add more check suites here
-    workflows:
-      - ci/bitrise/eee60d3f-32ce-4462-9576-d4587754bd73/pr
+
 
 jobs:
   my_job:
