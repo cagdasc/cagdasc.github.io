@@ -3,7 +3,6 @@ name: Trigger After Successful Check Suite
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [bitrise-checks]
 
 jobs:
   run_if_success:
