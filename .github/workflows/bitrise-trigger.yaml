@@ -2,6 +2,12 @@ name: Trigger After Successful Check Suite
 
 on:
   workflow_dispatch:
+  check_suite:
+    types:
+      - completed
+    # Add more check suites here
+    workflows:
+      - Bitrise Checks
 
 
 jobs:
