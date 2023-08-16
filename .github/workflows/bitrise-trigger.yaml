@@ -8,6 +8,7 @@ on:
     # Add more check suites here
     workflows:
       - Bitrise Checks
+      - bitrise-checks
 
 
 jobs:
