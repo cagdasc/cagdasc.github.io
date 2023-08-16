@@ -13,14 +13,13 @@ jobs:
       - name: Run payload
         run: echo "${{ github.event.client_payload.message }}"
       
-      - name: Check if check suite was successful
-        id: check_status
+      - name: Check if check runs was successful
+        id: check_runs
         run: echo "Check suite status ${{ github.event.check_run.conclusion }}"
 
-      - name: Trigger if check suite was successful
-        if: steps.check_status.outputs.check_status == 'success'
-        run: |
-          echo "Check suite was successful"
-          # Add your custom commands here
+      - name: Check if check runs was successful
+        id: check_runs_name
+        run: echo "Check suite status ${{ github.event.check_run.app.name }}"
+      
       - name: Run another action
         run: echo "SUCCESS"
