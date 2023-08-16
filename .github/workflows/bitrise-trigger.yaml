@@ -2,9 +2,11 @@ name: Trigger After Successful Check Suite
 
 on:
   workflow_dispatch:
-  # check_run:
-  check_suite:
+  check_run:
+  # check_suite:
     types: [completed]
+    branches-ignore:
+      - dev
     
 jobs:
   trigger:
