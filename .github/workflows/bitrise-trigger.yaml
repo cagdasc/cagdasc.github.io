@@ -3,14 +3,8 @@ name: Trigger After Successful Check Suite
 on:
   workflow_dispatch:
   #check_run:
-  # check_suite:
-    #types: [completed]
-    #branches-ignore:
-      #- dev
-  repository_dispatch:
-    types:
-      - bitrise
-      - Bitrise Checks
+  check_suite:
+    types: [completed]
     
 jobs:
   trigger:
@@ -21,6 +15,10 @@ jobs:
       - name: Check if check runs branch
         id: check_runs_branch
         run: echo "Check suite status ${{ github.event.check_run.head_branch }}"
+
+      - name: Check if check runs pulls
+        id: check_runs_pull_requests
+        run: echo "Check suite status ${{ github.event.check_run.pull_requests }}"
         
       - name: Check if check runs status
         id: check_runs_status
