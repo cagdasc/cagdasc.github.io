@@ -2,24 +2,21 @@ name: Trigger After Successful Check Suite
 
 on:
   workflow_dispatch:
-  check_suite:
-    types:
-      - completed
-    # Add more check suites here
-    workflows:
-      - Bitrise Checks
-      - bitrise-checks
-
+  repository_dispatch:
+    types: [bitrise]
 
 jobs:
-  my_job:
+  run_if_success:
+    if: ${{ github.event.client_payload.passed }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check if check_suite successful
-        id: check_suite
-        run: echo "Check suite status ${{ github.event.check_suite }}"
-
-      - name: Check if check_runs was successful
-        id: check_runs
-        run: echo "Check suite status ${{ github.event.check_runs }}"
+      - env:
+          MESSAGE: ${{ github.event.client_payload.message }}
+        run: echo $MESSAGE
+  run_if_failure:
+    if: ${{ !github.event.client_payload.passed }}
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          MESSAGE: ${{ github.event.client_payload.message }}
+        run: echo $MESSAGE
