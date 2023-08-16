@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
+      - env:
+          MESSAGE: ${{ github.event.client_payload.message }}
+        run: echo $MESSAGE
+        
       - name: Run another action
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+        run: echo "SUCCESS"
