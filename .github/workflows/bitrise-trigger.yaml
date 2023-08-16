@@ -2,20 +2,15 @@ name: Trigger After Successful Check Suite
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-
+  check_run:
+    types: [rerequested, completed]
+    
 jobs:
-  run_if_success:
-    if: ${{ github.event.client_payload.passed }}
+  trigger:
     runs-on: ubuntu-latest
+
     steps:
-      - env:
-          MESSAGE: ${{ github.event.client_payload.message }}
-        run: echo $MESSAGE
-  run_if_failure:
-    if: ${{ !github.event.client_payload.passed }}
-    runs-on: ubuntu-latest
-    steps:
-      - env:
-          MESSAGE: ${{ github.event.client_payload.message }}
-        run: echo $MESSAGE
+
+      - name: Run another action
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
