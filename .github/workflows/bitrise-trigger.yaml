@@ -1,7 +1,7 @@
 name: Trigger After Successful Check Suite
 
 on:
-  check_suite:
+  check_run:
     types:
       - completed
 
