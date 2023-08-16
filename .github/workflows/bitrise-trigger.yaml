@@ -10,14 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run payload
-        run: echo "${{ github.event.client_payload.message }}"
-      
-      - name: Check if check runs was successful
+
+      - name: Check if check runs status
+        id: check_runs_status
+        run: echo "Check suite status ${{ github.event.check_run.status }}"
+        
+      - name: Check if check runs conclusion
         id: check_runs
         run: echo "Check suite status ${{ github.event.check_run.conclusion }}"
 
-      - name: Check if check runs was successful
+      - name: Check if check runs app name
         id: check_runs_name
         run: echo "Check suite status ${{ github.event.check_run.app.name }}"
       
