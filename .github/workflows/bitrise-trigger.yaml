@@ -3,16 +3,24 @@ name: Trigger After Successful Check Suite
 on:
   workflow_dispatch:
   check_run:
-    types: [rerequested, completed]
+    types: [completed]
     
 jobs:
   trigger:
     runs-on: ubuntu-latest
 
     steps:
-      - env:
-          MESSAGE: ${{ github.event.client_payload.message }}
-        run: echo $MESSAGE
-        
+      - name: Run payload
+        run: echo "${{ github.event.client_payload.message }}"
+      
+      - name: Check if check suite was successful
+        id: check_status
+        run: echo "Check suite status ${{ github.event.check_run.conclusion }}"
+
+      - name: Trigger if check suite was successful
+        if: steps.check_status.outputs.check_status == 'success'
+        run: |
+          echo "Check suite was successful"
+          # Add your custom commands here
       - name: Run another action
         run: echo "SUCCESS"
