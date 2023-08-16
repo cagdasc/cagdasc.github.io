@@ -11,6 +11,10 @@ jobs:
 
     steps:
 
+      - name: Check if check runs branch
+        id: check_runs_branch
+        run: echo "Check suite status ${{ github.event.check_run.head_branch }}"
+        
       - name: Check if check runs status
         id: check_runs_status
         run: echo "Check suite status ${{ github.event.check_run.status }}"
