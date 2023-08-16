@@ -20,7 +20,7 @@ jobs:
         id: check_runs_pull_requests
         run: |
           for pr in "${{ github.event.check_run.pull_requests }}"; do
-            echo "Pull Request: $pr"
+            echo "Pull Request Number: $pr.number"
           done
         
       - name: Check if check runs status
