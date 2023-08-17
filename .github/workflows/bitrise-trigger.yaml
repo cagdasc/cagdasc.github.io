@@ -21,6 +21,7 @@ jobs:
 
       - name: Run bitrise script
         id: bitris_script
+        if: ${{ github.event.check_run.conclusion == 'success' }}
         run: python .github/bitrise-checks.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
