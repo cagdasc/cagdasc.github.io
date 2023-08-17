@@ -1,7 +1,7 @@
 import os
 import json
 
-event_data_path = os.environ.get('CHECK_RUN_CONCLUSION')
+event_data_path = os.environ.get('GITHUB_EVENT_PATH')
 
 if event_data_path:
     with open(event_data_path, 'r') as event_file:
