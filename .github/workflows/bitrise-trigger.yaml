@@ -24,7 +24,11 @@ jobs:
         run: |
           echo "CHECK_RUN_CONCLUSION=$GITHUB_EVENT_PATH" >> $GITHUB_ENV
           python .github/bitrise-checks.py
-          
+
+      - name: Check if check runs path
+        id: check_path
+        run: echo "Event path $GITHUB_EVENT_PATH and env $GITHUB_ENV"
+        
       - name: Check if check runs payload
         id: check_payload_branch
         run: echo "Check suite status ${{ github.event.check_run }}"
