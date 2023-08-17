@@ -19,7 +19,7 @@ jobs:
 
       - name: Run bitrise script
         id: bitris_script
-        run: python ${GITHUB_WORKSPACE}/scripts/bitrise-checks.py
+        run: python .github/bitrise-checks.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           #PAYLOAD: ${{ github.event.check_run }}
