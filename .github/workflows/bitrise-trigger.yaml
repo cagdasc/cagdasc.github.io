@@ -22,8 +22,8 @@ jobs:
         run: python bitrise-checks.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PAYLOAD: ${{ github.event.check_run }}
-          PRS: ${{ github.event.check_run.pull_requests }}
+          #PAYLOAD: ${{ github.event.check_run }}
+          #PRS: ${{ github.event.check_run.pull_requests }}
           
       - name: Check if check runs payload
         id: check_payload_branch
