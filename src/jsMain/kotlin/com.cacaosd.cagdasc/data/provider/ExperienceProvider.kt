@@ -8,7 +8,7 @@ object ExperienceProvider {
     operator fun invoke() = Section.Experience(
         experiences = listOf(
             Experiences(
-                company = "Nutmeg",
+                company = "Nutmeg, a J.P. Morgan company",
                 position = "Senior Android Developer",
                 date = "March 2023 - Present",
                 quote = "Nutmeg is the UK’s largest truly digital wealth manager, offering clarity and transparency to both seasoned and first-time investors as they seek to achieve their financial goals.",
