@@ -6,9 +6,10 @@ import { ArticleReader } from './components/ArticleReader';
 import { GitHubWorkflowModal } from './components/GitHubWorkflowModal';
 import { Footer } from './components/Footer';
 import { PrintCVView } from './components/PrintCVView';
-import { blogPostsData } from './data/blogPosts';
+import { blogPostsData } from './data/posts';
+import { ThemeProvider } from './context/ThemeContext';
 
-export default function App() {
+function AppContent() {
   const [activeTab, setActiveTab] = useState<'cv' | 'blog'>('cv');
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
   const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState<boolean>(false);
@@ -70,8 +71,13 @@ export default function App() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#1E293B] selection:bg-blue-500/20 selection:text-blue-700">
-      
+    <div 
+      className="min-h-screen transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--app-bg)',
+        color: 'var(--app-text)',
+      }}
+    >
       {/* Top Fixed Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -112,7 +118,15 @@ export default function App() {
 
       {/* High-Resolution Clean Print / PDF Resume View */}
       <PrintCVView />
-
     </div>
   );
 }
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}
+

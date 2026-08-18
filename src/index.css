@@ -1,8 +1,243 @@
 @import "tailwindcss";
 
+:root,
+html.theme-light {
+  /* Default Clean Light Theme */
+  --app-bg: #F8FAFC;
+  --app-surface: #FFFFFF;
+  --app-surface-subtle: #F1F5F9;
+  --app-surface-card: #FFFFFF;
+  --app-border: #E2E8F0;
+  --app-border-subtle: #F1F5F9;
+  --app-text: #0F172A;
+  --app-text-secondary: #334155;
+  --app-text-muted: #64748B;
+  --app-accent: #2563EB;
+  --app-accent-hover: #1D4ED8;
+  --app-accent-bg: #EFF6FF;
+  --app-accent-border: #BFDBFE;
+  --app-nav-bg: rgba(255, 255, 255, 0.85);
+  --app-chip-bg: #F1F5F9;
+  --app-chip-border: #E2E8F0;
+  --app-chip-text: #334155;
+}
+
+/* Soft Light Theme: Oat & Sand (Warm Editorial) */
+html.theme-light-oat {
+  --app-bg: #FAF8F5;
+  --app-surface: #FFFFFF;
+  --app-surface-subtle: #F4EFEA;
+  --app-surface-card: #FFFFFF;
+  --app-border: #E8E2D8;
+  --app-border-subtle: #F2ECE2;
+  --app-text: #292524;
+  --app-text-secondary: #57534E;
+  --app-text-muted: #78716C;
+  --app-accent: #B45309;
+  --app-accent-hover: #92400E;
+  --app-accent-bg: #FEF3C7;
+  --app-accent-border: #FDE68A;
+  --app-nav-bg: rgba(250, 248, 245, 0.88);
+  --app-chip-bg: #F4EFEA;
+  --app-chip-border: #E8E2D8;
+  --app-chip-text: #44403C;
+}
+
+/* Soft Light Theme: Sage Mist (Calm Botanical) */
+html.theme-light-sage {
+  --app-bg: #F3F7F4;
+  --app-surface: #FFFFFF;
+  --app-surface-subtle: #E8F0EA;
+  --app-surface-card: #FFFFFF;
+  --app-border: #D1E1D5;
+  --app-border-subtle: #E1ECE4;
+  --app-text: #193325;
+  --app-text-secondary: #315340;
+  --app-text-muted: #587966;
+  --app-accent: #059669;
+  --app-accent-hover: #047857;
+  --app-accent-bg: #ECFDF5;
+  --app-accent-border: #A7F3D0;
+  --app-nav-bg: rgba(243, 247, 244, 0.88);
+  --app-chip-bg: #E8F0EA;
+  --app-chip-border: #D1E1D5;
+  --app-chip-text: #234533;
+}
+
+/* Soft Light Theme: Sky Azure (Airy Tranquil) */
+html.theme-light-azure {
+  --app-bg: #F2F7FA;
+  --app-surface: #FFFFFF;
+  --app-surface-subtle: #E4EFF6;
+  --app-surface-card: #FFFFFF;
+  --app-border: #CCE0ED;
+  --app-border-subtle: #DEECF5;
+  --app-text: #132435;
+  --app-text-secondary: #33506B;
+  --app-text-muted: #5C7B99;
+  --app-accent: #0284C7;
+  --app-accent-hover: #0369A1;
+  --app-accent-bg: #F0F9FF;
+  --app-accent-border: #BAE6FD;
+  --app-nav-bg: rgba(242, 247, 250, 0.88);
+  --app-chip-bg: #E4EFF6;
+  --app-chip-border: #CCE0ED;
+  --app-chip-text: #24415C;
+}
+
+/* Soft Light Theme: Lavender Mist (Gentle Lilac) */
+html.theme-light-lavender {
+  --app-bg: #F7F5FA;
+  --app-surface: #FFFFFF;
+  --app-surface-subtle: #EDE9F5;
+  --app-surface-card: #FFFFFF;
+  --app-border: #DDD6EA;
+  --app-border-subtle: #E9E3F3;
+  --app-text: #281E38;
+  --app-text-secondary: #52446D;
+  --app-text-muted: #7D6E99;
+  --app-accent: #7C3AED;
+  --app-accent-hover: #6D28D9;
+  --app-accent-bg: #F5F3FF;
+  --app-accent-border: #DDD6FE;
+  --app-nav-bg: rgba(247, 245, 250, 0.88);
+  --app-chip-bg: #EDE9F5;
+  --app-chip-border: #DDD6EA;
+  --app-chip-text: #3D3154;
+}
+
+/* Dark Theme: Green Alternative 1 - Deep Emerald Obsidian */
+html.theme-emerald-matrix {
+  --app-bg: #020B06;
+  --app-surface: #06170E;
+  --app-surface-subtle: #0B2416;
+  --app-surface-card: #06170E;
+  --app-border: #143A24;
+  --app-border-subtle: #0B2617;
+  --app-text: #F0FDF4;
+  --app-text-secondary: #BBF7D0;
+  --app-text-muted: #86EFAC;
+  --app-accent: #10B981;
+  --app-accent-hover: #059669;
+  --app-accent-bg: rgba(16, 185, 129, 0.12);
+  --app-accent-border: rgba(16, 185, 129, 0.28);
+  --app-nav-bg: rgba(2, 11, 6, 0.88);
+  --app-chip-bg: #0B2416;
+  --app-chip-border: #143A24;
+  --app-chip-text: #DCFCE7;
+}
+
+/* Dark Theme: Green Alternative 2 - Pine Forest Night */
+html.theme-forest-pine {
+  --app-bg: #040D09;
+  --app-surface: #091A13;
+  --app-surface-subtle: #0F271D;
+  --app-surface-card: #091A13;
+  --app-border: #183C2D;
+  --app-border-subtle: #0E291E;
+  --app-text: #ECFDF5;
+  --app-text-secondary: #A7F3D0;
+  --app-text-muted: #6EE7B7;
+  --app-accent: #34D399;
+  --app-accent-hover: #10B981;
+  --app-accent-bg: rgba(52, 211, 153, 0.12);
+  --app-accent-border: rgba(52, 211, 153, 0.28);
+  --app-nav-bg: rgba(4, 13, 9, 0.88);
+  --app-chip-bg: #0F271D;
+  --app-chip-border: #183C2D;
+  --app-chip-text: #D1FAE5;
+}
+
+/* Dark Theme: Alternative 1 - Dimmed Slate Blue (Default Dark - Deep & High Contrast) */
+html.theme-dimmed-slate {
+  --app-bg: #030712;
+  --app-surface: #0B1120;
+  --app-surface-subtle: #0F172A;
+  --app-surface-card: #0B1120;
+  --app-border: #1E293B;
+  --app-border-subtle: #111B2E;
+  --app-text: #F8FAFC;
+  --app-text-secondary: #CBD5E1;
+  --app-text-muted: #94A3B8;
+  --app-accent: #38BDF8;
+  --app-accent-hover: #0EA5E9;
+  --app-accent-bg: rgba(56, 189, 248, 0.12);
+  --app-accent-border: rgba(56, 189, 248, 0.28);
+  --app-nav-bg: rgba(3, 7, 18, 0.88);
+  --app-chip-bg: #0F172A;
+  --app-chip-border: #1E293B;
+  --app-chip-text: #E2E8F0;
+}
+
+/* Dark Theme: Alternative 2 - Pitch Midnight Navy */
+html.theme-midnight-navy {
+  --app-bg: #020617;
+  --app-surface: #070D1E;
+  --app-surface-subtle: #0D1730;
+  --app-surface-card: #070D1E;
+  --app-border: #132247;
+  --app-border-subtle: #0A142E;
+  --app-text: #F1F5F9;
+  --app-text-secondary: #C8D6E5;
+  --app-text-muted: #8EA3BF;
+  --app-accent: #60A5FA;
+  --app-accent-hover: #3B82F6;
+  --app-accent-bg: rgba(96, 165, 250, 0.12);
+  --app-accent-border: rgba(96, 165, 250, 0.28);
+  --app-nav-bg: rgba(2, 6, 23, 0.88);
+  --app-chip-bg: #0C1633;
+  --app-chip-border: #162852;
+  --app-chip-text: #E2E8F0;
+}
+
+/* Dark Theme: Alternative 3 - Nordic Steel Blue (Deep Arctic) */
+html.theme-nordic-steel {
+  --app-bg: #040910;
+  --app-surface: #0A1320;
+  --app-surface-subtle: #0F1D30;
+  --app-surface-card: #0A1320;
+  --app-border: #162A45;
+  --app-border-subtle: #0E1B2E;
+  --app-text: #F0F4F8;
+  --app-text-secondary: #C4CCD3;
+  --app-text-muted: #8496A8;
+  --app-accent: #00B4D8;
+  --app-accent-hover: #0096C7;
+  --app-accent-bg: rgba(0, 180, 216, 0.12);
+  --app-accent-border: rgba(0, 180, 216, 0.28);
+  --app-nav-bg: rgba(4, 9, 16, 0.88);
+  --app-chip-bg: #0E1A2C;
+  --app-chip-border: #192E4C;
+  --app-chip-text: #E0E1DD;
+}
+
+/* Dark Theme: Alternative 4 - Indigo Twilight (Deep Night) */
+html.theme-indigo-twilight {
+  --app-bg: #04050E;
+  --app-surface: #0A0D1E;
+  --app-surface-subtle: #101430;
+  --app-surface-card: #0A0D1E;
+  --app-border: #1B2147;
+  --app-border-subtle: #101533;
+  --app-text: #F5F3FF;
+  --app-text-secondary: #DDD6FE;
+  --app-text-muted: #9CA3AF;
+  --app-accent: #818CF8;
+  --app-accent-hover: #6366F1;
+  --app-accent-bg: rgba(129, 140, 248, 0.12);
+  --app-accent-border: rgba(129, 140, 248, 0.28);
+  --app-nav-bg: rgba(4, 5, 14, 0.88);
+  --app-chip-bg: #0F1433;
+  --app-chip-border: #1E2554;
+  --app-chip-text: #EDE9FE;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--app-bg);
+    color: var(--app-text);
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   code, pre, kbd {
@@ -20,19 +255,19 @@
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--app-bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--app-border);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--app-text-muted);
 }
 
 /* Markdown typography enhancements */
 .prose-custom {
-  color: #334155;
+  color: var(--app-text-secondary);
 }
 .prose-custom p {
   margin-top: 1.1em;
@@ -42,7 +277,7 @@
 .prose-custom h2 {
   font-size: 1.65rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--app-text);
   margin-top: 2rem;
   margin-bottom: 0.75rem;
   letter-spacing: -0.02em;
@@ -50,7 +285,7 @@
 .prose-custom h3 {
   font-size: 1.3rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--app-text);
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
   letter-spacing: -0.01em;
@@ -72,11 +307,11 @@
   margin-bottom: 0.35rem;
 }
 .prose-custom blockquote {
-  border-left: 4px solid #2563eb;
-  background-color: #eff6ff;
+  border-left: 4px solid var(--app-accent);
+  background-color: var(--app-accent-bg);
   padding: 0.75rem 1rem;
   border-radius: 0 0.5rem 0.5rem 0;
-  color: #1e3a8a;
+  color: var(--app-text);
   font-style: italic;
   margin: 1.25rem 0;
 }

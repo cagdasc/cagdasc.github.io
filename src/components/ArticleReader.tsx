@@ -4,7 +4,6 @@ import remarkGfm from 'remark-gfm';
 import { 
   ArrowLeft, 
   Calendar, 
-  Clock, 
   Tag, 
   Share2, 
   Copy, 
@@ -12,16 +11,11 @@ import {
   BookOpen, 
   Twitter, 
   Linkedin, 
-  Bookmark,
-  ChevronRight,
-  Terminal,
-  User,
-  Sparkles,
-  List
+  ChevronRight, 
+  List 
 } from 'lucide-react';
 import { BlogPost } from '../types';
-import { blogPostsData } from '../data/blogPosts';
-import { profileData } from '../data/cvData';
+import { blogPostsData } from '../data/posts';
 
 interface ArticleReaderProps {
   post: BlogPost;
@@ -29,30 +23,30 @@ interface ArticleReaderProps {
   onSelectArticle: (slug: string) => void;
 }
 
-// Custom Code block renderer with copy button
-const CodeBlock: React.FC<{
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-}> = ({ inline, className, children }) => {
+// Custom Code block renderer for fenced code blocks
+const PreBlock: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [copied, setCopied] = useState(false);
-  const match = /language-(\w+)/.exec(className || '');
-  const language = match ? match[1] : '';
-  const codeText = String(children).replace(/\n$/, '');
+
+  // Extract code text and language from inner <code> child
+  let codeText = '';
+  let language = '';
+
+  if (React.isValidElement(children)) {
+    const codeProps = children.props as { className?: string; children?: React.ReactNode };
+    if (codeProps) {
+      const match = /language-(\w+)/.exec(codeProps.className || '');
+      language = match ? match[1] : '';
+      codeText = String(codeProps.children || '').replace(/\n$/, '');
+    }
+  } else {
+    codeText = String(children || '').replace(/\n$/, '');
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(codeText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  if (inline) {
-    return (
-      <code className="px-1.5 py-0.5 rounded bg-slate-100 text-blue-700 font-mono text-xs border border-slate-200">
-        {children}
-      </code>
-    );
-  }
 
   return (
     <div className="relative my-6 rounded-xl border border-slate-800 bg-[#0F172A] overflow-hidden group shadow-md text-slate-200">
@@ -69,7 +63,7 @@ const CodeBlock: React.FC<{
 
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
           title="Copy Code to Clipboard"
         >
           {copied ? (
@@ -87,12 +81,44 @@ const CodeBlock: React.FC<{
       </div>
 
       {/* Code body */}
-      <div className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-blue-300/90 leading-relaxed">
-        <pre className="!m-0 !p-0 bg-transparent">
-          <code>{children}</code>
+      <div className="p-4 overflow-x-auto text-xs sm:text-sm font-mono text-emerald-300/90 leading-relaxed">
+        <pre className="!m-0 !p-0 bg-transparent font-mono">
+          {children}
         </pre>
       </div>
     </div>
+  );
+};
+
+// Custom Code renderer for inline and block code elements
+const CodeComponent: React.FC<{
+  className?: string;
+  children?: React.ReactNode;
+  [key: string]: any;
+}> = ({ className, children, ...props }) => {
+  const match = /language-(\w+)/.exec(className || '');
+  const isBlock = Boolean(match);
+
+  if (isBlock) {
+    return (
+      <code className={`${className || ''} font-mono`} {...props}>
+        {children}
+      </code>
+    );
+  }
+
+  return (
+    <code 
+      className="px-1.5 py-0.5 rounded text-xs font-mono font-medium border"
+      style={{
+        backgroundColor: 'var(--app-surface-subtle)',
+        borderColor: 'var(--app-border)',
+        color: 'var(--app-accent)',
+      }}
+      {...props}
+    >
+      {children}
+    </code>
   );
 };
 
@@ -156,16 +182,29 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
   const otherPosts = blogPostsData.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
-    <article id="article-reader-view" className="pt-24 pb-20 relative bg-[#F8FAFC]">
+    <article 
+      id="article-reader-view" 
+      className="pt-24 pb-20 relative transition-colors duration-200"
+      style={{
+        backgroundColor: 'var(--app-bg)',
+        color: 'var(--app-text)',
+      }}
+    >
       
       {/* Top Reading Progress Bar */}
       <div 
-        className="fixed top-0 left-0 right-0 h-1 bg-slate-200 z-50 pointer-events-none"
-        style={{ top: '64px' }}
+        className="fixed top-0 left-0 right-0 h-1 z-50 pointer-events-none"
+        style={{ 
+          top: '64px',
+          backgroundColor: 'var(--app-border)' 
+        }}
       >
         <div 
-          className="h-full bg-blue-600 transition-all duration-75"
-          style={{ width: `${scrollProgress}%` }}
+          className="h-full transition-all duration-75"
+          style={{ 
+            width: `${scrollProgress}%`,
+            backgroundColor: 'var(--app-accent)'
+          }}
         />
       </div>
 
@@ -176,7 +215,12 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
           <button
             id="article-back-btn"
             onClick={onBack}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-blue-600 border border-slate-200 text-xs font-mono transition-all group shadow-xs"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-mono transition-all group shadow-xs hover:opacity-80"
+            style={{
+              backgroundColor: 'var(--app-surface-card)',
+              borderColor: 'var(--app-border)',
+              color: 'var(--app-text)',
+            }}
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span>Back to All Articles</span>
@@ -186,21 +230,36 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyLink}
-              className="p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 border border-slate-200 transition-colors shadow-xs"
+              className="p-2 rounded-lg border transition-colors shadow-xs hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--app-surface-card)',
+                borderColor: 'var(--app-border)',
+                color: 'var(--app-text-muted)',
+              }}
               title="Copy Article Link"
             >
-              {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+              {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             </button>
             <button
               onClick={handleShareTwitter}
-              className="p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-500 hover:text-blue-500 border border-slate-200 transition-colors shadow-xs"
+              className="p-2 rounded-lg border transition-colors shadow-xs hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--app-surface-card)',
+                borderColor: 'var(--app-border)',
+                color: 'var(--app-text-muted)',
+              }}
               title="Share on X / Twitter"
             >
               <Twitter className="w-4 h-4" />
             </button>
             <button
               onClick={handleShareLinkedIn}
-              className="p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-500 hover:text-blue-600 border border-slate-200 transition-colors shadow-xs"
+              className="p-2 rounded-lg border transition-colors shadow-xs hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--app-surface-card)',
+                borderColor: 'var(--app-border)',
+                color: 'var(--app-text-muted)',
+              }}
               title="Share on LinkedIn"
             >
               <Linkedin className="w-4 h-4" />
@@ -209,48 +268,55 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
         </div>
 
         {/* Article Header Card */}
-        <header className="space-y-4 pb-8 mb-8 border-b border-slate-200">
+        <header 
+          className="space-y-4 pb-8 mb-8 border-b"
+          style={{ borderColor: 'var(--app-border)' }}
+        >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-mono font-medium bg-blue-50 text-blue-700 border border-blue-200">
+            <span 
+              className="px-3 py-1 rounded-full text-xs font-mono font-medium border"
+              style={{
+                backgroundColor: 'var(--app-accent-bg)',
+                borderColor: 'var(--app-accent-border)',
+                color: 'var(--app-accent)',
+              }}
+            >
               {post.category}
             </span>
-            <div className="flex items-center gap-3 text-xs font-mono text-slate-500">
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                {post.publishedAt}
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
-                {post.readTime}
-              </span>
+            <div className="flex items-center gap-1.5 text-xs font-mono" style={{ color: 'var(--app-text-muted)' }}>
+              <Calendar className="w-3.5 h-3.5 opacity-70" />
+              <span>{post.publishedAt}</span>
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold font-heading text-slate-900 tracking-tight leading-tight">
+          <h1 
+            className="text-2xl sm:text-4xl lg:text-5xl font-extrabold font-heading tracking-tight leading-tight"
+            style={{ color: 'var(--app-text)' }}
+          >
             {post.title}
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
+          <p 
+            className="text-base sm:text-lg font-normal leading-relaxed"
+            style={{ color: 'var(--app-text-secondary)' }}
+          >
             {post.summary}
           </p>
-
-          {/* Author Badge */}
-          <div className="flex items-center gap-3 pt-4">
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold font-heading text-sm shadow-xs">
-              ÇÇ
-            </div>
-            <div>
-              <div className="text-sm font-bold text-slate-900">{profileData.name}</div>
-              <div className="text-xs text-slate-500 font-mono">Senior Android Developer @ Nutmeg (J.P. Morgan)</div>
-            </div>
-          </div>
         </header>
 
         {/* Quick Table of Contents if multiple sections exist */}
         {tableOfContents.length > 1 && (
-          <div className="mb-10 p-5 rounded-2xl bg-white border border-slate-200 shadow-xs">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-blue-600 mb-3 font-semibold">
+          <div 
+            className="mb-10 p-5 rounded-2xl border shadow-xs"
+            style={{
+              backgroundColor: 'var(--app-surface-card)',
+              borderColor: 'var(--app-border)',
+            }}
+          >
+            <div 
+              className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider mb-3 font-semibold"
+              style={{ color: 'var(--app-accent)' }}
+            >
               <List className="w-4 h-4" />
               <span>Table of Contents</span>
             </div>
@@ -259,9 +325,10 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
                 <a
                   key={idx}
                   href={`#${item.id}`}
-                  className="block text-xs sm:text-sm text-slate-600 hover:text-blue-600 transition-colors py-0.5"
+                  className="block text-xs sm:text-sm transition-colors py-0.5 hover:underline"
+                  style={{ color: 'var(--app-text-secondary)' }}
                 >
-                  <span className="text-slate-400 font-mono mr-2">0{idx + 1}.</span>
+                  <span className="font-mono mr-2 opacity-60">0{idx + 1}.</span>
                   {item.text}
                 </a>
               ))}
@@ -270,22 +337,36 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
         )}
 
         {/* Markdown Content Body */}
-        <div className="prose-custom text-slate-700 text-sm sm:text-base leading-relaxed space-y-4">
+        <div 
+          className="prose-custom text-sm sm:text-base leading-relaxed space-y-4"
+          style={{ color: 'var(--app-text-secondary)' }}
+        >
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              code: CodeBlock,
+              pre: PreBlock,
+              code: CodeComponent,
               h2: ({ children }) => {
                 const text = String(children);
                 const id = text.toLowerCase().replace(/[^\w]+/g, '-');
                 return (
-                  <h2 id={id} className="text-xl sm:text-2xl font-bold font-heading text-slate-900 pt-6 pb-2 border-b border-slate-200">
+                  <h2 
+                    id={id} 
+                    className="text-xl sm:text-2xl font-bold font-heading pt-6 pb-2 border-b"
+                    style={{ 
+                      color: 'var(--app-text)',
+                      borderColor: 'var(--app-border)',
+                    }}
+                  >
                     {children}
                   </h2>
                 );
               },
               h3: ({ children }) => (
-                <h3 className="text-lg sm:text-xl font-bold font-heading text-slate-900 pt-4 pb-1">
+                <h3 
+                  className="text-lg sm:text-xl font-bold font-heading pt-4 pb-1"
+                  style={{ color: 'var(--app-text)' }}
+                >
                   {children}
                 </h3>
               ),
@@ -294,24 +375,50 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline underline-offset-4 decoration-blue-300 hover:decoration-blue-600 transition-all font-medium"
+                  className="underline underline-offset-4 font-medium transition-all"
+                  style={{ 
+                    color: 'var(--app-accent)',
+                  }}
                 >
                   {children}
                 </a>
               ),
               table: ({ children }) => (
-                <div className="overflow-x-auto my-6 rounded-xl border border-slate-200 bg-white">
+                <div 
+                  className="overflow-x-auto my-6 rounded-xl border"
+                  style={{
+                    backgroundColor: 'var(--app-surface-card)',
+                    borderColor: 'var(--app-border)',
+                  }}
+                >
                   <table className="w-full text-left text-xs sm:text-sm font-mono">{children}</table>
                 </div>
               ),
               thead: ({ children }) => (
-                <thead className="bg-slate-50 text-slate-800 border-b border-slate-200">{children}</thead>
+                <thead 
+                  className="border-b font-semibold"
+                  style={{
+                    backgroundColor: 'var(--app-surface-subtle)',
+                    color: 'var(--app-text)',
+                    borderColor: 'var(--app-border)',
+                  }}
+                >
+                  {children}
+                </thead>
               ),
               th: ({ children }) => (
                 <th className="px-4 py-3 font-semibold">{children}</th>
               ),
               td: ({ children }) => (
-                <td className="px-4 py-2.5 border-b border-slate-100 text-slate-700">{children}</td>
+                <td 
+                  className="px-4 py-2.5 border-b"
+                  style={{
+                    borderColor: 'var(--app-border)',
+                    color: 'var(--app-text-secondary)',
+                  }}
+                >
+                  {children}
+                </td>
               )
             }}
           >
@@ -320,13 +427,21 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
         </div>
 
         {/* Tags Footer */}
-        <div className="mt-12 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <div 
+          className="mt-12 pt-6 border-t flex flex-wrap items-center justify-between gap-4"
+          style={{ borderColor: 'var(--app-border)' }}
+        >
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-mono text-slate-400">Tags:</span>
+            <span className="text-xs font-mono" style={{ color: 'var(--app-text-muted)' }}>Tags:</span>
             {post.tags.map((tag, idx) => (
               <span
                 key={idx}
-                className="px-2.5 py-1 rounded-md bg-white border border-slate-200 text-xs font-mono text-slate-600 shadow-xs"
+                className="px-2.5 py-1 rounded-md border text-xs font-mono shadow-xs"
+                style={{
+                  backgroundColor: 'var(--app-chip-bg)',
+                  borderColor: 'var(--app-chip-border)',
+                  color: 'var(--app-chip-text)',
+                }}
               >
                 #{tag}
               </span>
@@ -335,12 +450,17 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
 
           <button
             onClick={handleCopyLink}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-xs font-mono text-slate-700 border border-slate-200 transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors shadow-xs hover:opacity-80"
+            style={{
+              backgroundColor: 'var(--app-surface-card)',
+              borderColor: 'var(--app-border)',
+              color: 'var(--app-text)',
+            }}
           >
             {copiedLink ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-emerald-600 font-semibold">Link Copied!</span>
+                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-emerald-500 font-semibold">Link Copied!</span>
               </>
             ) : (
               <>
@@ -353,9 +473,15 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
 
         {/* Related Articles Section */}
         {otherPosts.length > 0 && (
-          <div className="mt-16 pt-10 border-t border-slate-200 space-y-6">
-            <h3 className="text-xl font-bold font-heading text-slate-900 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-blue-600" />
+          <div 
+            className="mt-16 pt-10 border-t space-y-6"
+            style={{ borderColor: 'var(--app-border)' }}
+          >
+            <h3 
+              className="text-xl font-bold font-heading flex items-center gap-2"
+              style={{ color: 'var(--app-text)' }}
+            >
+              <BookOpen className="w-5 h-5" style={{ color: 'var(--app-accent)' }} />
               <span>More Technical Articles</span>
             </h3>
 
@@ -364,23 +490,42 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
                 <div
                   key={other.slug}
                   onClick={() => onSelectArticle(other.slug)}
-                  className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-blue-300 cursor-pointer transition-all duration-200 flex flex-col justify-between group shadow-xs hover:shadow-md"
+                  className="p-5 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between group shadow-xs hover:opacity-90"
+                  style={{
+                    backgroundColor: 'var(--app-surface-card)',
+                    borderColor: 'var(--app-border)',
+                  }}
                 >
                   <div className="space-y-2">
-                    <span className="text-[11px] font-mono text-blue-600 uppercase font-semibold">
+                    <span 
+                      className="text-[11px] font-mono uppercase font-semibold"
+                      style={{ color: 'var(--app-accent)' }}
+                    >
                       {other.category}
                     </span>
-                    <h4 className="text-base font-bold font-heading text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                    <h4 
+                      className="text-base font-bold font-heading group-hover:opacity-80 transition-colors line-clamp-2"
+                      style={{ color: 'var(--app-text)' }}
+                    >
                       {other.title}
                     </h4>
-                    <p className="text-xs text-slate-600 line-clamp-2">
+                    <p className="text-xs line-clamp-2" style={{ color: 'var(--app-text-secondary)' }}>
                       {other.summary}
                     </p>
                   </div>
 
-                  <div className="pt-4 flex items-center justify-between text-xs font-mono text-slate-400">
-                    <span>{other.readTime}</span>
-                    <span className="text-blue-600 font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <div 
+                    className="pt-4 flex items-center justify-between text-xs font-mono"
+                    style={{ color: 'var(--app-text-muted)' }}
+                  >
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 opacity-70" />
+                      {other.publishedAt}
+                    </span>
+                    <span 
+                      className="font-semibold flex items-center gap-1 group-hover:translate-x-1 transition-transform"
+                      style={{ color: 'var(--app-accent)' }}
+                    >
                       <span>Read</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </span>

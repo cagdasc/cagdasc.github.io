@@ -3,6 +3,7 @@ import {
   BookOpen, 
   FileText
 } from 'lucide-react';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface NavbarProps {
   activeTab: 'cv' | 'blog';
@@ -28,16 +29,26 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header 
       id="main-navbar"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 no-print ${
-        scrolled 
-          ? 'bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs' 
-          : 'bg-white/80 backdrop-blur-sm border-b border-slate-200/80'
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-200 no-print backdrop-blur-md border-b"
+      style={{
+        backgroundColor: 'var(--app-nav-bg)',
+        borderColor: 'var(--app-border)',
+      }}
     >
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-center h-16">
-          {/* Navigation Tabs: Resume and Blog */}
-          <nav className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 shadow-xs">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16">
+          
+          {/* Left placeholder for symmetric layout */}
+          <div className="w-10 hidden sm:block" />
+
+          {/* Centered Navigation Tabs: Resume and Blog */}
+          <nav 
+            className="flex items-center p-1 rounded-xl border shadow-xs"
+            style={{
+              backgroundColor: 'var(--app-surface-subtle)',
+              borderColor: 'var(--app-border)',
+            }}
+          >
             <button
               id="nav-tab-resume"
               onClick={() => {
@@ -46,9 +57,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 flex items-center gap-2 ${
                 activeTab === 'cv'
-                  ? 'bg-white text-blue-600 shadow-xs font-semibold'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'shadow-xs font-semibold'
+                  : 'hover:opacity-80'
               }`}
+              style={{
+                backgroundColor: activeTab === 'cv' ? 'var(--app-surface)' : 'transparent',
+                color: activeTab === 'cv' ? 'var(--app-accent)' : 'var(--app-text-muted)',
+              }}
             >
               <FileText className="w-3.5 h-3.5" />
               <span>Resume</span>
@@ -62,19 +77,27 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               className={`px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-150 flex items-center gap-2 ${
                 activeTab === 'blog'
-                  ? 'bg-white text-blue-600 shadow-xs font-semibold'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'shadow-xs font-semibold'
+                  : 'hover:opacity-80'
               }`}
+              style={{
+                backgroundColor: activeTab === 'blog' ? 'var(--app-surface)' : 'transparent',
+                color: activeTab === 'blog' ? 'var(--app-accent)' : 'var(--app-text-muted)',
+              }}
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>Blog</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                
-              </span>
             </button>
           </nav>
+
+          {/* Right Side: Theme & Dark Blue Alternatives Selector */}
+          <div className="flex items-center">
+            <ThemeSwitcher />
+          </div>
+
         </div>
       </div>
     </header>
   );
 };
+
