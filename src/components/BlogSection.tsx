@@ -71,13 +71,13 @@ export const BlogSection: React.FC<BlogSectionProps> = ({ onSelectArticle }) => 
             className="text-3xl sm:text-5xl font-extrabold font-heading tracking-tight"
             style={{ color: 'var(--app-text)' }}
           >
-            Articles & Android Engineering Insights
+            Articles
           </h1>
           <p 
             className="text-base sm:text-lg leading-relaxed"
             style={{ color: 'var(--app-text-secondary)' }}
           >
-            Deep dives into Jetpack Compose, Kotlin Multiplatform, automated screenshot testing with KSP & Paparazzi, and high-scale mobile architectures.
+            A collection of experiments, technical findings, and lessons learned from building things.
           </p>
         </div>
 

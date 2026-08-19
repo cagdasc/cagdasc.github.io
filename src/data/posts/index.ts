@@ -1,33 +1,18 @@
 import { BlogPost } from '../../types';
-import { post1ScreenshotTesting } from './post1-screenshot-testing';
-import { post2BackPresses } from './post2-back-presses';
-import { post3KmpFoundations } from './post3-kmp-foundations';
-import { post4MobileCicd } from './post4-mobile-cicd';
-import { post5FintechUdf } from './post5-fintech-udf';
+import { agentBehindEmulator } from './agent-behind-the-emulator';
 
 // Individual post exports for direct access
 export {
-  post1ScreenshotTesting,
-  post2BackPresses,
-  post3KmpFoundations,
-  post4MobileCicd,
-  post5FintechUdf,
+  agentBehindEmulator
 };
 
 /**
  * All published blog posts ordered chronologically
  * (Newest posts first)
  */
-/*
 export const blogPostsData: BlogPost[] = [
-  post1ScreenshotTesting,
-  post2BackPresses,
-  post3KmpFoundations,
-  post4MobileCicd,
-  post5FintechUdf,
-];
-*/
-export const blogPostsData: BlogPost[] = []
+  agentBehindEmulator
+]
 
 /**
  * Helper to retrieve a single blog post by its slug identifier
