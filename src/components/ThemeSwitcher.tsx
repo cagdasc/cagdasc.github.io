@@ -109,7 +109,7 @@ export const ThemeSwitcher: React.FC = () => {
           {/* Theme Dropdown Panel */}
           {isOpen && (
             <div
-              className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl p-4 shadow-2xl border z-50 animate-in fade-in zoom-in-95 duration-150 top-full"
+              className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] sm:w-96 rounded-2xl p-4 shadow-2xl border z-50 animate-in fade-in zoom-in-95 duration-150 top-full"
               style={{
                 backgroundColor: 'var(--app-surface)',
                 borderColor: 'var(--app-border)',

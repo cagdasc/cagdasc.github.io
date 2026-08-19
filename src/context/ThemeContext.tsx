@@ -178,7 +178,22 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       root.classList.add('dark');
     }
     root.classList.add(`theme-${theme}`);
-  }, [theme, isDark]);
+
+    // Update meta theme-color tag dynamically for mobile browser UI (Firefox, Chrome, Safari)
+    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (!metaThemeColor) {
+      metaThemeColor = document.createElement('meta');
+      metaThemeColor.setAttribute('name', 'theme-color');
+      document.head.appendChild(metaThemeColor);
+    }
+    metaThemeColor.setAttribute('content', currentOption.previewBg);
+
+    // Keep html & body inline background matching so overscroll has no white padding
+    root.style.backgroundColor = currentOption.previewBg;
+    if (document.body) {
+      document.body.style.backgroundColor = currentOption.previewBg;
+    }
+  }, [theme, isDark, currentOption]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, isDark, toggleTheme, currentOption }}>

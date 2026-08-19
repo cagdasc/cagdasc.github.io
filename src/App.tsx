@@ -72,7 +72,7 @@ function AppContent() {
 
   return (
     <div 
-      className="min-h-screen transition-colors duration-200"
+      className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden transition-colors duration-200"
       style={{
         backgroundColor: 'var(--app-bg)',
         color: 'var(--app-text)',
