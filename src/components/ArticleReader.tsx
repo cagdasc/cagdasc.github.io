@@ -161,8 +161,12 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, [post]);
 
+  const getCanonicalUrl = () => {
+    return `${window.location.origin}/blog/${post.slug}`;
+  };
+
   const handleCopyLink = () => {
-    const url = `${window.location.origin}${window.location.pathname}#blog/${post.slug}`;
+    const url = getCanonicalUrl();
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -170,14 +174,14 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
   };
 
   const handleShareTwitter = () => {
-    const text = `"${post.title}" by @cagdascaglak`;
-    const url = `${window.location.origin}${window.location.pathname}#blog/${post.slug}`;
+    const text = `"${post.title}" by Cagdas Caglak`;
+    const url = getCanonicalUrl();
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
     trackEvent('share_article', { platform: 'twitter', article_slug: post.slug });
   };
 
   const handleShareLinkedIn = () => {
-    const url = `${window.location.origin}${window.location.pathname}#blog/${post.slug}`;
+    const url = getCanonicalUrl();
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
     trackEvent('share_article', { platform: 'linkedin', article_slug: post.slug });
   };
@@ -245,18 +249,6 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
               {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
             </button>
             <button
-              onClick={handleShareTwitter}
-              className="p-2 rounded-lg border transition-colors shadow-xs hover:opacity-80"
-              style={{
-                backgroundColor: 'var(--app-surface-card)',
-                borderColor: 'var(--app-border)',
-                color: 'var(--app-text-muted)',
-              }}
-              title="Share on X / Twitter"
-            >
-              <Twitter className="w-4 h-4" />
-            </button>
-            <button
               onClick={handleShareLinkedIn}
               className="p-2 rounded-lg border transition-colors shadow-xs hover:opacity-80"
               style={{
@@ -267,6 +259,18 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
               title="Share on LinkedIn"
             >
               <Linkedin className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleShareTwitter}
+              className="p-2 rounded-lg border transition-colors shadow-xs hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--app-surface-card)',
+                borderColor: 'var(--app-border)',
+                color: 'var(--app-text-muted)',
+              }}
+              title="Share on X / Twitter"
+            >
+              <Twitter className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -452,27 +456,53 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
             ))}
           </div>
 
-          <button
-            onClick={handleCopyLink}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors shadow-xs hover:opacity-80"
-            style={{
-              backgroundColor: 'var(--app-surface-card)',
-              borderColor: 'var(--app-border)',
-              color: 'var(--app-text)',
-            }}
-          >
-            {copiedLink ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-500" />
-                <span className="text-emerald-500 font-semibold">Link Copied!</span>
-              </>
-            ) : (
-              <>
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share Article</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopyLink}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-mono transition-colors shadow-xs hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--app-surface-card)',
+                borderColor: 'var(--app-border)',
+                color: 'var(--app-text)',
+              }}
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-emerald-500 font-semibold">Link Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Link</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleShareLinkedIn}
+              className="p-1.5 rounded-lg border transition-colors shadow-xs hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--app-surface-card)',
+                borderColor: 'var(--app-border)',
+                color: 'var(--app-text-muted)',
+              }}
+              title="Share on LinkedIn"
+            >
+              <Linkedin className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleShareTwitter}
+              className="p-1.5 rounded-lg border transition-colors shadow-xs hover:opacity-80"
+              style={{
+                backgroundColor: 'var(--app-surface-card)',
+                borderColor: 'var(--app-border)',
+                color: 'var(--app-text-muted)',
+              }}
+              title="Share on X"
+            >
+              <Twitter className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         {/* Related Articles Section */}

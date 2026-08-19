@@ -1,5 +1,5 @@
 import { BlogPost } from '../../types';
-import article from "./agent_behind_the_emulator.md?raw";
+import article from './agent_behind_the_emulator.md?raw';
 
 export const agentBehindEmulator: BlogPost = {
   id: '1',
@@ -13,3 +13,5 @@ export const agentBehindEmulator: BlogPost = {
   featured: false,
   content: article
 };
+
+

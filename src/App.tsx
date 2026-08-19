@@ -9,6 +9,7 @@ import { PrintCVView } from './components/PrintCVView';
 import { blogPostsData } from './data/posts';
 import { ThemeProvider } from './context/ThemeContext';
 import { initGA, trackPageView } from './utils/analytics';
+import { updateDocumentMeta } from './utils/meta';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<'cv' | 'blog'>('cv');
@@ -20,10 +21,37 @@ function AppContent() {
     initGA();
   }, []);
 
-  // Hash route synchronizer for GitHub Pages deep linking
+  // Universal Route Synchronizer (Handles /blog/:slug, query ?post=..., and hash #blog/:slug)
   useEffect(() => {
-    const handleHashChange = () => {
+    const parseCurrentRoute = () => {
+      const pathname = window.location.pathname;
+      const searchParams = new URLSearchParams(window.location.search);
       const hash = window.location.hash.replace(/^#\/?/, '');
+
+      // 1. Check path e.g. /blog/agent-behind-the-emulator or /posts/agent-behind-the-emulator
+      const pathMatch = pathname.match(/^\/(?:blog|posts)\/([a-zA-Z0-9_-]+)/);
+      if (pathMatch) {
+        const slug = pathMatch[1];
+        const post = blogPostsData.find((p) => p.slug === slug);
+        if (post) {
+          setActiveTab('blog');
+          setSelectedArticleSlug(slug);
+          return;
+        }
+      }
+
+      // 2. Check query param ?post=agent-behind-the-emulator
+      const querySlug = searchParams.get('post');
+      if (querySlug) {
+        const post = blogPostsData.find((p) => p.slug === querySlug);
+        if (post) {
+          setActiveTab('blog');
+          setSelectedArticleSlug(querySlug);
+          return;
+        }
+      }
+
+      // 3. Check hash e.g. #blog/agent-behind-the-emulator
       if (hash.startsWith('blog/')) {
         const slug = hash.replace('blog/', '');
         const post = blogPostsData.find((p) => p.slug === slug);
@@ -33,40 +61,65 @@ function AppContent() {
           return;
         }
       }
-      if (hash === 'blog') {
+
+      if (hash === 'blog' || pathname === '/blog') {
         setActiveTab('blog');
         setSelectedArticleSlug(null);
         return;
       }
-      if (hash === 'cv' || hash === '' || hash === 'resume') {
+
+      if (hash === 'cv' || hash === '' || hash === 'resume' || pathname === '/' || pathname === '/cv') {
         setActiveTab('cv');
         setSelectedArticleSlug(null);
       }
     };
 
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    parseCurrentRoute();
+    window.addEventListener('hashchange', parseCurrentRoute);
+    window.addEventListener('popstate', parseCurrentRoute);
+    return () => {
+      window.removeEventListener('hashchange', parseCurrentRoute);
+      window.removeEventListener('popstate', parseCurrentRoute);
+    };
   }, []);
 
   const activeArticle = selectedArticleSlug
     ? blogPostsData.find((p) => p.slug === selectedArticleSlug) || null
     : null;
 
-  // Track page view on tab or article change
+  // Track page view and synchronize document metadata
   useEffect(() => {
     let path = '#cv';
     let title = 'Cagdas Caglak | Senior Android Developer';
+    let description = 'Senior Android Developer at Nutmeg (J.P. Morgan) specializing in Jetpack Compose, Kotlin Multiplatform, clean architecture, and developer tooling.';
+    let url = `${window.location.origin}/`;
+    let image = `${window.location.origin}/api/og?type=cv`;
+    let type = 'website';
 
     if (activeTab === 'blog') {
       if (selectedArticleSlug && activeArticle) {
         path = `#blog/${selectedArticleSlug}`;
         title = `${activeArticle.title} | Cagdas Caglak`;
+        description = activeArticle.summary;
+        url = `${window.location.origin}/blog/${selectedArticleSlug}`;
+        image = `${window.location.origin}/api/og?slug=${selectedArticleSlug}`;
+        type = 'article';
       } else {
         path = '#blog';
         title = 'Blog & Technical Articles | Cagdas Caglak';
+        description = 'A collection of experiments, technical findings, and lessons learned from building software.';
+        url = `${window.location.origin}/blog`;
       }
     }
+
+    // Update document title & OpenGraph tags in live DOM
+    updateDocumentMeta({
+      title,
+      description,
+      url,
+      image,
+      type,
+    });
 
     trackPageView(path, title);
   }, [activeTab, selectedArticleSlug, activeArticle]);
