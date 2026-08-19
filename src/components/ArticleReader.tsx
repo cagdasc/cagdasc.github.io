@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { BlogPost } from '../types';
 import { blogPostsData } from '../data/posts';
+import { trackEvent } from '../utils/analytics';
 
 interface ArticleReaderProps {
   post: BlogPost;
@@ -165,17 +166,20 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
+    trackEvent('copy_article_link', { article_slug: post.slug, article_title: post.title });
   };
 
   const handleShareTwitter = () => {
     const text = `"${post.title}" by @cagdascaglak`;
     const url = `${window.location.origin}${window.location.pathname}#blog/${post.slug}`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    trackEvent('share_article', { platform: 'twitter', article_slug: post.slug });
   };
 
   const handleShareLinkedIn = () => {
     const url = `${window.location.origin}${window.location.pathname}#blog/${post.slug}`;
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+    trackEvent('share_article', { platform: 'linkedin', article_slug: post.slug });
   };
 
   // Find related posts

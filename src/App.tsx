@@ -8,11 +8,17 @@ import { Footer } from './components/Footer';
 import { PrintCVView } from './components/PrintCVView';
 import { blogPostsData } from './data/posts';
 import { ThemeProvider } from './context/ThemeContext';
+import { initGA, trackPageView } from './utils/analytics';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<'cv' | 'blog'>('cv');
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
   const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState<boolean>(false);
+
+  // Initialize GA4 on mount
+  useEffect(() => {
+    initGA();
+  }, []);
 
   // Hash route synchronizer for GitHub Pages deep linking
   useEffect(() => {
@@ -43,6 +49,28 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  const activeArticle = selectedArticleSlug
+    ? blogPostsData.find((p) => p.slug === selectedArticleSlug) || null
+    : null;
+
+  // Track page view on tab or article change
+  useEffect(() => {
+    let path = '#cv';
+    let title = 'Cagdas Caglak | Senior Android Developer';
+
+    if (activeTab === 'blog') {
+      if (selectedArticleSlug && activeArticle) {
+        path = `#blog/${selectedArticleSlug}`;
+        title = `${activeArticle.title} | Cagdas Caglak`;
+      } else {
+        path = '#blog';
+        title = 'Blog & Technical Articles | Cagdas Caglak';
+      }
+    }
+
+    trackPageView(path, title);
+  }, [activeTab, selectedArticleSlug, activeArticle]);
+
   const handleSelectArticle = (slug: string) => {
     setSelectedArticleSlug(slug);
     setActiveTab('blog');
@@ -65,10 +93,6 @@ function AppContent() {
       window.location.hash = 'blog';
     }
   };
-
-  const activeArticle = selectedArticleSlug
-    ? blogPostsData.find((p) => p.slug === selectedArticleSlug) || null
-    : null;
 
   return (
     <div 

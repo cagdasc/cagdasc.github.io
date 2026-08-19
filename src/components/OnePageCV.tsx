@@ -21,6 +21,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { profileData, experiencesData, skillCategoriesData, projectsData, talksData, educationData } from '../data/cvData';
+import { trackEvent } from '../utils/analytics';
 
 interface OnePageCVProps {
   onGoToBlog: () => void;
@@ -33,9 +34,11 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
     navigator.clipboard.writeText(profileData.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
+    trackEvent('copy_email', { email: profileData.email });
   };
 
   const handlePrint = () => {
+    trackEvent('print_cv');
     window.print();
   };
 
