@@ -13,7 +13,7 @@ export const profileData: ProfileInfo = {
   medium: 'https://medium.com/@cagdascaglak',
   twitter: 'https://twitter.com/cagdascaglak',
   shortBio: 'Passionate Senior Android Engineer specializing in Jetpack Compose, Kotlin Multiplatform (KMP), Clean Architecture, and Developer Tooling. Building scalable fintech & consumer products and open-source automation tools.',
-  fullBio: 'I am an experienced Android developer with a strong background in the finance sector. Passionate about exploring new technologies, mentoring others, and solving complex problems, I thrive on building efficient and scalable solutions. Beyond my day-to-day work, I have a special interest in enhancing developer experience by creating tools and workflows that improve productivity. In my free time, I enjoy developing my own applications and contributing to open-source projects, continuously learning and giving back to the community.',
+  fullBio: 'Senior Android Engineer with over a decade of experience delivering complex mobile systems at scale. Specializing in application architecture, developer tooling, and platform modernization, I enjoy solving challenging engineering problems and building systems that enable teams to move faster with confidence. My work spans mobile platforms, code generation, testing automation, AI-powered tooling, and open-source projects, with a strong focus on creating reliable, maintainable, and developer-friendly solutions. Regularly experimenting with emerging technologies, sharing knowledge, and contributing to the broader engineering community through speaking, writing, and open-source development.',
   stats: [
     {
       value: '10+',
@@ -35,13 +35,19 @@ export const experiencesData: ExperienceItem[] = [
     badge: 'Current Role',
     description: 'JPMPI is the UK\'s largest truly digital wealth manager, offering clarity and transparency to both seasoned and first-time investors as they seek to achieve their financial goals.',
     highlights: [
-      'Leading mobile platform development and modernization of the core Nutmeg Android application, delivering secure personal investing services at scale',
-      'Leading the migration from RxJava to Kotlin Coroutines and Flow, modernizing asynchronous programming across the Android platform',
-      'Driving the migration from XML-based Android UI to Jetpack Compose, improving UI development consistency and maintainability',
-      'Building a screenshot test generator using KSP, Paparazzi, and custom Gradle tooling to eliminate manually written screenshot tests and automate UI regression coverage',
-      'Architecting and evolving a modular, multi-module Clean Architecture using Kotlin, Jetpack Compose, Coroutines, and Flow to accelerate feature delivery',
-      'Working on core features of a personal investing application, including portfolio management, investment workflows, and real-time financial insights',
-      'Driving developer experience and platform modernization initiatives across the Android codebase, improving engineering efficiency and reducing maintenance overhead'
+      'Leading mobile platform development and modernization of the core JPMPI Android application, delivering secure personal investing services at scale',
+
+      'Developing core features for a personal investing platform, including portfolio management, investment journeys, and real-time financial insights',
+
+      'Designed and delivered an automated screenshot testing platform using KSP, Paparazzi, and custom Gradle tooling, generating and maintaining 1,000+ UI screenshots with zero engineer-authored screenshot tests while significantly expanding regression coverage',
+      
+      'Leading the migration from RxJava to Kotlin Coroutines and Flow, modernizing asynchronous programming across the Android platform and establishing a consistent reactive architecture',
+
+      'Driving the migration from XML-based Android UI to Jetpack Compose, improving development velocity, UI consistency, and long-term maintainability',
+
+      'Architecting and evolving a modular, multi-module Clean Architecture using Kotlin, Jetpack Compose, Coroutines, and Flow to accelerate feature delivery and improve code maintainability',
+
+      'Driving developer experience initiatives through automation, code generation, testing infrastructure, and platform tooling to improve engineering productivity and software quality',
     ],
     skills: ['Kotlin', 'Jetpack Compose', 'Kotlin Multiplatform', 'KSP', 'Paparazzi', 'Coroutines & Flow', 'Dagger / Hilt', 'RxJava', 'Clean Architecture'],
     metrics: '99.95% crash-free users, 70% reduction in UI regression cycle time'
