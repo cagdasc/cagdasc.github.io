@@ -130,7 +130,7 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
 
           {/* Bio / Summary */}
           <p 
-            className="text-sm sm:text-base leading-relaxed pt-2"
+            className="text-sm sm:text-base leading-relaxed pt-2 whitespace-pre-line"
             style={{ color: 'var(--app-text-secondary)' }}
           >
             {profileData.fullBio}
@@ -186,14 +186,14 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
                   </div>
                 </div>
 
-                <p className="text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--app-text-secondary)' }}>
+                <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-line" style={{ color: 'var(--app-text-secondary)' }}>
                   {exp.description}
                 </p>
 
                 {/* Bullet highlights */}
                 <ul className="list-disc list-outside ml-4 space-y-1.5 text-xs sm:text-sm" style={{ color: 'var(--app-text-secondary)' }}>
                   {exp.highlights.map((item, idx) => (
-                    <li key={idx} className="leading-relaxed">
+                    <li key={idx} className="leading-relaxed whitespace-pre-line">
                       {item}
                     </li>
                   ))}

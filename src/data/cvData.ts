@@ -13,7 +13,7 @@ export const profileData: ProfileInfo = {
   medium: 'https://medium.com/@cagdascaglak',
   twitter: 'https://twitter.com/cagdascaglak',
   shortBio: 'Passionate Senior Android Engineer specializing in Jetpack Compose, Kotlin Multiplatform (KMP), Clean Architecture, and Developer Tooling. Building scalable fintech & consumer products and open-source automation tools.',
-  fullBio: 'Senior Android Engineer with over a decade of experience delivering complex mobile systems at scale. Specializing in application architecture, developer tooling, and platform modernization, I enjoy solving challenging engineering problems and building systems that enable teams to move faster with confidence. My work spans mobile platforms, code generation, testing automation, AI-powered tooling, and open-source projects, with a strong focus on creating reliable, maintainable, and developer-friendly solutions. Regularly experimenting with emerging technologies, sharing knowledge, and contributing to the broader engineering community through speaking, writing, and open-source development.',
+  fullBio: "Senior Android Engineer with over a decade of experience delivering complex mobile systems at scale. Specializing in application architecture, developer tooling, and platform modernization, I enjoy solving challenging engineering problems and building systems that enable teams to move faster with confidence. My work spans mobile platforms, code generation, testing automation, AI-powered tooling, and open-source projects, with a strong focus on creating reliable, maintainable, and developer-friendly solutions. Regularly experimenting with emerging technologies, sharing knowledge, and contributing to the broader engineering community through speaking, writing, and open-source development. \n\n Outside of engineering, I spend some of my downtime in World of Warcraft. I\'m very much a casual player — no raiding schedules, no competitive grind, just an hour or two in the evening to relax and make questionable decisions with my warlock.",
   stats: [
     {
       value: '10+',
@@ -35,21 +35,21 @@ export const experiencesData: ExperienceItem[] = [
     badge: 'Current Role',
     description: 'JPMPI is the UK\'s largest truly digital wealth manager, offering clarity and transparency to both seasoned and first-time investors as they seek to achieve their financial goals.',
     highlights: [
-      'Leading mobile platform development and modernization of the core JPMPI Android application, delivering secure personal investing services at scale',
-
-      'Developing core features for a personal investing platform, including portfolio management, investment journeys, and real-time financial insights',
-
+      'Leading Android development of the brokerage platform from its inception, shaping key mobile architecture and technical decisions for a stock trading and investing experience',
+      
+      'Developing core features for a managed investment and brokerage platform, including stock trading, portfolio management, investment journeys, and real-time financial insights',
+      
       'Designed and delivered an automated screenshot testing platform using KSP, Paparazzi, and custom Gradle tooling, generating and maintaining 1,000+ UI screenshots with zero engineer-authored screenshot tests while significantly expanding regression coverage',
       
-      'Leading the migration from RxJava to Kotlin Coroutines and Flow, modernizing asynchronous programming across the Android platform and establishing a consistent reactive architecture',
-
-      'Driving the migration from XML-based Android UI to Jetpack Compose, improving development velocity, UI consistency, and long-term maintainability',
-
-      'Architecting and evolving a modular, multi-module Clean Architecture using Kotlin, Jetpack Compose, Coroutines, and Flow to accelerate feature delivery and improve code maintainability',
-
-      'Driving developer experience initiatives through automation, code generation, testing infrastructure, and platform tooling to improve engineering productivity and software quality',
+      'Leading the migration from RxJava to Kotlin Coroutines and Flow across a major networking initiative, modernizing asynchronous programming and establishing a consistent reactive architecture',
+      
+      'Architecting and evolving a modular, multi-module Clean Architecture using Kotlin, Jetpack Compose, Coroutines, Flow, and GraphQL, including the implementation of a Ktor-based networking layer to evolve the platform towards Kotlin Multiplatform compatibility',
+      
+      'Contributing to developer experience initiatives through automation, code generation, CI/CD, testing infrastructure, and platform tooling to improve engineering productivity and software quality',
+      
+      'Partnering closely with Product and Design throughout the end-to-end product lifecycle, shaping key product and technical decisions from concept through delivery'
     ],
-    skills: ['Kotlin', 'Jetpack Compose', 'Kotlin Multiplatform', 'KSP', 'Paparazzi', 'Coroutines & Flow', 'Dagger / Hilt', 'RxJava', 'Clean Architecture'],
+    skills: ['Kotlin', 'Jetpack Compose', 'Kotlin Multiplatform', 'KSP', 'Paparazzi', 'Coroutines & Flow', 'Ktor', 'GraphQL', 'Dagger / Hilt', 'RxJava'],
     metrics: '99.95% crash-free users, 70% reduction in UI regression cycle time'
   },
   {
@@ -62,8 +62,7 @@ export const experiencesData: ExperienceItem[] = [
     location: 'Istanbul / Turkey',
     description: 'The world\'s most popular mental wellness platform for non-English speakers.',
     highlights: [
-      'Taking key roles at scaling "Meditopia" application to millions of users on Android platforms',
-      'Developing "Meditopia" Android applications, maintaining and integrating new technologies',
+      'Building "Meditopia" Android applications, maintaining and integrating new technologies',
       'Taking advantage of declarative UI development with Jetpack Compose',
       'Taking advantage of functional programming by using Kotlin programming languages',
       'Implemented Clean Architecture using Hilt and Kotlin Flow',
@@ -84,10 +83,9 @@ export const experiencesData: ExperienceItem[] = [
     location: 'Istanbul / Turkey',
     description: 'Garanti BBVA Technology is one of the biggest banking infrastructure companies in Turkey.',
     highlights: [
-      'Developing "Garanti BBVA Mobile" Android application, maintaining and integrating new technologies.',
+      'Building "Garanti BBVA Mobile" Android application, maintaining and integrating new technologies.',
       'Fulfilling key roles at scaling "Garanti BBVA Mobile" application to millions of users on Android platforms.',
-      'Developing an AI based customer assistants to increase the accessibility of application features.',
-      'Taking advantage of functional programming by using Kotlin programming languages.',
+      'Building an AI based customer assistants to increase the accessibility of application features.',
       'Building a code generation tool and save 30% of development time.',
       'Increasing code coverage with move application architecture from MVC to MVVM.',
       'Comprehensive experience in the design and implementation of Continuous Integration, Continuous Deployment, Continuous Delivery and DevOps Operations.',

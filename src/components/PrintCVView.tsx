@@ -48,7 +48,7 @@ export const PrintCVView: React.FC = () => {
               </div>
               <ul className="list-disc list-inside text-xs text-gray-800 space-y-1 pl-1">
                 {exp.highlights.map((h, i) => (
-                  <li key={i} className="leading-snug">{h}</li>
+                  <li key={i} className="leading-snug whitespace-pre-line">{h}</li>
                 ))}
               </ul>
               <div className="text-[11px] text-gray-600 font-mono pt-1">
