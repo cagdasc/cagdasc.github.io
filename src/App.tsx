@@ -101,14 +101,14 @@ function AppContent() {
         path = `#blog/${selectedArticleSlug}`;
         title = `${activeArticle.title} | Cagdas Caglak`;
         description = activeArticle.summary;
-        url = `${window.location.origin}/blog/${selectedArticleSlug}`;
+        url = `${window.location.origin}/#blog/${selectedArticleSlug}`;
         image = `${window.location.origin}/api/og?slug=${selectedArticleSlug}`;
         type = 'article';
       } else {
         path = '#blog';
         title = 'Blog & Technical Articles | Cagdas Caglak';
         description = 'A collection of experiments, technical findings, and lessons learned from building software.';
-        url = `${window.location.origin}/blog`;
+        url = `${window.location.origin}/#blog`;
       }
     }
 

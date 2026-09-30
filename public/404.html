@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting | Cagdas Caglak</title>
+    <script>
+      (function() {
+        var pathname = window.location.pathname;
+        var search = window.location.search || '';
+        var hash = window.location.hash || '';
+
+        // Match /blog/:slug or /posts/:slug
+        var match = pathname.match(/^\/(?:blog|posts)\/([a-zA-Z0-9_-]+)/);
+        if (match) {
+          window.location.replace('/#blog/' + match[1]);
+          return;
+        }
+
+        // Match /blog or /blog/
+        if (pathname === '/blog' || pathname === '/blog/') {
+          window.location.replace('/#blog');
+          return;
+        }
+
+        // Match /cv or /resume
+        if (pathname === '/cv' || pathname === '/resume') {
+          window.location.replace('/#cv');
+          return;
+        }
+
+        // Fallback redirect to root preserving hash
+        window.location.replace('/' + (hash ? hash : '#cv'));
+      })();
+    </script>
+  </head>
+  <body style="font-family: system-ui, sans-serif; text-align: center; padding-top: 50px; background: #0f172a; color: #f8fafc;">
+    <p>Redirecting to <a href="/" style="color: #38bdf8;">cagdas.caglak.cc</a>...</p>
+  </body>
+</html>

@@ -162,7 +162,10 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
   }, [post]);
 
   const getCanonicalUrl = () => {
-    return `${window.location.origin}/blog/${post.slug}`;
+    const origin = window.location.origin;
+    // Strip trailing slash or any legacy /blog prefix from pathname to form the base
+    const base = window.location.pathname.replace(/\/blog(?:\/.*)?$/, '').replace(/\/$/, '');
+    return `${origin}${base}/#blog/${post.slug}`;
   };
 
   const handleCopyLink = () => {
