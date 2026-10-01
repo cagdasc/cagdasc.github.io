@@ -93,7 +93,7 @@ function AppContent() {
     let title = 'Cagdas Caglak | Senior Android Developer';
     let description = 'Senior Android Developer at Nutmeg (J.P. Morgan) specializing in Jetpack Compose, Kotlin Multiplatform, clean architecture, and developer tooling.';
     let url = `${window.location.origin}/`;
-    let image = `${window.location.origin}/api/og?type=cv`;
+    let image = `${window.location.origin}/og/cv.png`;
     let type = 'website';
 
     if (activeTab === 'blog') {
@@ -101,14 +101,15 @@ function AppContent() {
         path = `#blog/${selectedArticleSlug}`;
         title = `${activeArticle.title} | Cagdas Caglak`;
         description = activeArticle.summary;
-        url = `${window.location.origin}/#blog/${selectedArticleSlug}`;
-        image = `${window.location.origin}/api/og?slug=${selectedArticleSlug}`;
+        url = `${window.location.origin}/blog/${selectedArticleSlug}`;
+        image = `${window.location.origin}/og/${selectedArticleSlug}.png`;
         type = 'article';
       } else {
         path = '#blog';
         title = 'Blog & Technical Articles | Cagdas Caglak';
         description = 'A collection of experiments, technical findings, and lessons learned from building software.';
-        url = `${window.location.origin}/#blog`;
+        url = `${window.location.origin}/blog`;
+        image = `${window.location.origin}/og/blog.png`;
       }
     }
 

@@ -27,7 +27,7 @@ export function updateDocumentMeta(options: ClientMetaOptions) {
 
   const origin = window.location.origin;
   const currentUrl = options.url || window.location.href;
-  const imageUrl = options.image || `${origin}/api/og?type=cv`;
+  const imageUrl = options.image || `${origin}/og/cv.png`;
   const ogType = options.type || 'website';
 
   // 3. OpenGraph Tags
@@ -35,6 +35,10 @@ export function updateDocumentMeta(options: ClientMetaOptions) {
   setMetaTag('meta[property="og:description"]', 'property', 'og:description', options.description);
   setMetaTag('meta[property="og:url"]', 'property', 'og:url', currentUrl);
   setMetaTag('meta[property="og:image"]', 'property', 'og:image', imageUrl);
+  setMetaTag('meta[property="og:image:secure_url"]', 'property', 'og:image:secure_url', imageUrl);
+  setMetaTag('meta[property="og:image:type"]', 'property', 'og:image:type', 'image/png');
+  setMetaTag('meta[property="og:image:width"]', 'property', 'og:image:width', '1200');
+  setMetaTag('meta[property="og:image:height"]', 'property', 'og:image:height', '630');
   setMetaTag('meta[property="og:type"]', 'property', 'og:type', ogType);
   setMetaTag('meta[property="og:site_name"]', 'property', 'og:site_name', 'Cagdas Caglak');
 
