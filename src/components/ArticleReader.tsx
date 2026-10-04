@@ -24,6 +24,27 @@ interface ArticleReaderProps {
   onSelectArticle: (slug: string) => void;
 }
 
+// Generate clean, url-friendly slug for markdown headings
+export const getHeadingId = (text: string): string => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+// Recursively extract plain string text from React nodes
+const extractNodeText = (node: React.ReactNode): string => {
+  if (node == null) return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(extractNodeText).join('');
+  if (React.isValidElement(node) && node.props && (node.props as any).children) {
+    return extractNodeText((node.props as any).children);
+  }
+  return '';
+};
+
 // Custom Code block renderer for fenced code blocks
 const PreBlock: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [copied, setCopied] = useState(false);
@@ -132,21 +153,56 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [tableOfContents, setTableOfContents] = useState<{ id: string; text: string }[]>([]);
 
-  useEffect(() => {
-    // Scroll to top upon opening article
-    window.scrollTo({ top: 0, behavior: 'instant' });
+  const scrollToHeading = (id: string, smooth: boolean = true) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const navOffset = 90;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = Math.max(0, elementPosition - navOffset);
 
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: smooth ? 'smooth' : 'instant',
+      });
+      return true;
+    }
+    return false;
+  };
+
+  useEffect(() => {
     // Extract H2 headings for Table of Contents
     const headings: { id: string; text: string }[] = [];
     const lines = post.content.split('\n');
     lines.forEach((line) => {
       if (line.startsWith('## ')) {
         const text = line.replace('## ', '').trim();
-        const id = text.toLowerCase().replace(/[^\w]+/g, '-');
-        headings.push({ id, text });
+        const id = getHeadingId(text);
+        if (id) {
+          headings.push({ id, text });
+        }
       }
     });
     setTableOfContents(headings);
+
+    // Check if there is an in-page section anchor in the URL to scroll to
+    const hash = window.location.hash;
+    let targetSectionId: string | null = null;
+
+    if (hash.includes('#', 1)) {
+      targetSectionId = hash.split('#').pop() || null;
+    } else if (hash && !hash.startsWith('#blog') && !hash.startsWith('#cv') && hash !== '#resume') {
+      targetSectionId = hash.replace(/^#/, '');
+    }
+
+    if (targetSectionId) {
+      const timer = setTimeout(() => {
+        scrollToHeading(targetSectionId!, true);
+      }, 150);
+      return () => clearTimeout(timer);
+    } else {
+      // Scroll to top upon opening article
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
 
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollTop;
@@ -160,6 +216,22 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [post]);
+
+  const handleTocClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    scrollToHeading(id, true);
+
+    // Safely update browser URL without replacing the blog route or triggering tab switch
+    const currentHash = window.location.hash;
+    if (currentHash.startsWith('#blog/')) {
+      const base = `#blog/${post.slug}`;
+      window.history.replaceState(null, '', `${base}#${id}`);
+    } else if (window.location.pathname.includes('/blog/')) {
+      window.history.replaceState(null, '', `#${id}`);
+    } else {
+      window.history.replaceState(null, '', `#blog/${post.slug}#${id}`);
+    }
+  };
 
   const getCanonicalUrl = () => {
     const origin = window.location.origin;
@@ -336,11 +408,16 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
                 <a
                   key={idx}
                   href={`#${item.id}`}
-                  className="block text-xs sm:text-sm transition-colors py-0.5 hover:underline"
+                  onClick={(e) => handleTocClick(e, item.id)}
+                  className="block text-xs sm:text-sm transition-colors py-1 hover:underline cursor-pointer group"
                   style={{ color: 'var(--app-text-secondary)' }}
                 >
-                  <span className="font-mono mr-2 opacity-60">0{idx + 1}.</span>
-                  {item.text}
+                  <span className="font-mono mr-2 opacity-60 group-hover:text-blue-500">
+                    {idx < 9 ? `0${idx + 1}` : idx + 1}.
+                  </span>
+                  <span className="group-hover:text-blue-600 dark:group-hover:text-sky-400 font-medium">
+                    {item.text}
+                  </span>
                 </a>
               ))}
             </div>
@@ -358,12 +435,12 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
               pre: PreBlock,
               code: CodeComponent,
               h2: ({ children }) => {
-                const text = String(children);
-                const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+                const text = extractNodeText(children);
+                const id = getHeadingId(text);
                 return (
                   <h2 
                     id={id} 
-                    className="text-xl sm:text-2xl font-bold font-heading pt-6 pb-2 border-b"
+                    className="text-xl sm:text-2xl font-bold font-heading pt-6 pb-2 border-b scroll-mt-24"
                     style={{ 
                       color: 'var(--app-text)',
                       borderColor: 'var(--app-border)',
@@ -373,14 +450,19 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
                   </h2>
                 );
               },
-              h3: ({ children }) => (
-                <h3 
-                  className="text-lg sm:text-xl font-bold font-heading pt-4 pb-1"
-                  style={{ color: 'var(--app-text)' }}
-                >
-                  {children}
-                </h3>
-              ),
+              h3: ({ children }) => {
+                const text = extractNodeText(children);
+                const id = getHeadingId(text);
+                return (
+                  <h3 
+                    id={id}
+                    className="text-lg sm:text-xl font-bold font-heading pt-4 pb-1 scroll-mt-24"
+                    style={{ color: 'var(--app-text)' }}
+                  >
+                    {children}
+                  </h3>
+                );
+              },
               a: ({ href, children }) => (
                 <a
                   href={href}

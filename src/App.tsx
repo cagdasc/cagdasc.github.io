@@ -26,7 +26,7 @@ function AppContent() {
     const parseCurrentRoute = () => {
       const pathname = window.location.pathname;
       const searchParams = new URLSearchParams(window.location.search);
-      const hash = window.location.hash.replace(/^#\/?/, '');
+      const rawHash = window.location.hash.replace(/^#\/?/, '');
 
       // 1. Check path e.g. /blog/agent-behind-the-emulator or /posts/agent-behind-the-emulator
       const pathMatch = pathname.match(/^\/(?:blog|posts)\/([a-zA-Z0-9_-]+)/);
@@ -51,9 +51,10 @@ function AppContent() {
         }
       }
 
-      // 3. Check hash e.g. #blog/agent-behind-the-emulator
-      if (hash.startsWith('blog/')) {
-        const slug = hash.replace('blog/', '');
+      // 3. Check hash e.g. #blog/agent-behind-the-emulator or #blog/agent-behind-the-emulator#section-heading
+      if (rawHash.startsWith('blog/')) {
+        const withoutBlog = rawHash.slice(5);
+        const slug = withoutBlog.split(/[#?]/)[0];
         const post = blogPostsData.find((p) => p.slug === slug);
         if (post) {
           setActiveTab('blog');
@@ -62,16 +63,35 @@ function AppContent() {
         }
       }
 
-      if (hash === 'blog' || pathname === '/blog') {
+      if (rawHash === 'blog' || pathname === '/blog' || pathname === '/blog/') {
         setActiveTab('blog');
         setSelectedArticleSlug(null);
         return;
       }
 
-      if (hash === 'cv' || hash === '' || hash === 'resume' || pathname === '/' || pathname === '/cv') {
+      if (rawHash === 'cv' || rawHash === 'resume' || pathname === '/cv' || pathname === '/resume') {
         setActiveTab('cv');
         setSelectedArticleSlug(null);
+        return;
       }
+
+      // Root path with no hash or empty hash -> CV default
+      if (!rawHash && (pathname === '/' || pathname === '' || pathname === '/index.html')) {
+        setActiveTab('cv');
+        setSelectedArticleSlug(null);
+        return;
+      }
+
+      // If rawHash matches a post slug directly:
+      const directPost = blogPostsData.find((p) => p.slug === rawHash);
+      if (directPost) {
+        setActiveTab('blog');
+        setSelectedArticleSlug(directPost.slug);
+        return;
+      }
+
+      // If rawHash is an in-page anchor (e.g. #giving-an-llm-hands), do NOT switch to CV!
+      // Keep current active view.
     };
 
     parseCurrentRoute();

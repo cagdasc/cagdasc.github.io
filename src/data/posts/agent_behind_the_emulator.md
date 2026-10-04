@@ -93,7 +93,7 @@ The goal is not to teach the agent how to tap a particular button.
 
 The goal is to give it enough understanding of the environment that it can determine which available action represents the intention **in the current UI**.
 
-## From one prompt to a strategy
+## From one prompt to a workflow
 
 My first instinct was to let the LLM handle this itself.
 
@@ -125,7 +125,7 @@ This is appealing because it is simple.
 
 It is also asking the model to solve too many different problems at once.
 
-Instead, I started introducing **strategy layers**.
+Instead, I started introducing **workflow layers**.
 
 The idea is to make the process more granular without taking the reasoning away from the LLM.
 
@@ -138,7 +138,7 @@ The architecture started moving towards:
 ```text
                 User Intent
                      ↓
-                Task Strategy
+                Task Workflow
                      ↓
                  Perception
                      ↓
@@ -151,7 +151,7 @@ The architecture started moving towards:
                   Next Step
 ```
 
-The tools remain the capabilities. The strategy determines **when and why those capabilities should be used**. That distinction turned out to be important.
+The tools remain the capabilities. The workflow determines **how those capabilities are composed to complete the task**. That distinction turned out to be important.
 
 ## Perception before interaction
 
@@ -207,17 +207,17 @@ The perception layer answers:
 
 It does not decide what the user ultimately wants. It creates the representation that allows the next layer to make that decision.
 
-## Strategy layering
+## Workflow layering
 
 Once perception became a separate concern, the rest of the system started to become clearer.
 
-Rather than giving the LLM every possible tool and asking it to figure out the entire workflow, I could define smaller strategies around specific responsibilities.
+Rather than giving the LLM every possible tool and asking it to figure out the entire workflow, I could define smaller workflow stages around specific responsibilities.
 
 For example:
 
 ```text
-User Request
-     ↓
+      User Request
+           ↓
 ┌─────────────────────┐
 │ Intent / Task       │
 │ Understanding       │
@@ -229,7 +229,7 @@ User Request
 └──────────┬──────────┘
            ↓
 ┌─────────────────────┐
-│ Action Strategy     │
+│ Action              │
 │ Decide what to do   │
 └──────────┬──────────┘
            ↓
@@ -285,7 +285,7 @@ The agent does not necessarily need to know that these are two different test ca
 
 It needs to perceive both screens and map the same intention to the appropriate interaction.
 
-So the strategy becomes:
+So the workflow becomes:
 
 ```text
               Intended Action
@@ -304,7 +304,7 @@ So the strategy becomes:
       Enter "10"           Tap "£10"
 ```
 
-The UI changed but the strategy did not. That is the abstraction I am interested in.
+The UI changed but the **workflow did not**. That is the abstraction I am interested in.
 
 ## Interaction is not completion
 
@@ -336,7 +336,7 @@ Perceive again
 Verify
 ```
 
-For the transfer example, the strategy might look like:
+For the transfer example, the workflow might look like:
 
 ```text
 1. Navigate to transfer
@@ -386,7 +386,7 @@ It is to build an agent that can operate an environment in a way that is underst
 
 A single large reasoning loop makes it difficult to understand why an action was chosen.
 
-With more granular strategies, each stage has a clearer contract.
+With a more granular workflow, each stage has a clearer contract.
 
 For example:
 
@@ -408,13 +408,13 @@ But it is reasoning about the right problem at the right time. This also means t
 
 A better hierarchy representation can improve perception.
 
-A better interaction strategy can improve action selection.
+A better interaction layer can improve action selection.
 
-A better verification strategy can improve confidence in the result.
+A better verification layer can improve confidence in the result.
 
 The layers give those improvements somewhere to live.
 
-## Tools are capabilities, strategy is behaviour
+## Tools are capabilities, workflows define behaviour
 
 This became one of the most important architectural distinctions in DroidMind.
 
@@ -422,9 +422,9 @@ Tools answer:
 
 > What can the agent do?
 
-Strategies answer:
+Workflows answer:
 
-> How should the agent use those capabilities?
+> How should those capabilities be composed to complete the task?
 
 For example, a `tap` tool is a capability.
 
@@ -436,7 +436,7 @@ Similarly, a UI hierarchy tool can retrieve the current screen.
 
 It does not know which part of that screen matters.
 
-That responsibility belongs to the strategy.
+That responsibility belongs to the workflow.
 
 So the architecture becomes:
 
@@ -444,7 +444,7 @@ So the architecture becomes:
                   Agent
                     │
               ┌─────┴─────┐
-              │  Strategy  │
+              │  Workflow │
               └─────┬─────┘
                     │
           ┌─────────┼─────────┐
@@ -486,7 +486,7 @@ The intention can remain the same.
 
 If the agent is tightly coupled to the UI implementation, every change becomes another automation problem.
 
-If the agent can perceive the environment, reason about the current state, and select an appropriate interaction strategy, the UI becomes an implementation detail rather than the definition of the task.
+If the agent can perceive the environment, reason about the current state, and select an appropriate interaction workflow, the UI becomes an implementation detail rather than the definition of the task.
 
 That is what I am exploring with DroidMind.
 
