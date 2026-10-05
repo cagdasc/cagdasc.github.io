@@ -1,499 +1,228 @@
 # The Agent Behind the Emulator
 
-I started building DroidMind as an experiment.
+I started building [**DroidMind**](https://github.com/cagdasc/droidmind) as an experiment to explore what happens when you give a Large Language Model (LLM) the ability to interact directly with a real mobile application. I wanted to understand whether a model could look at a screen, interpret what is happening, decide on an action, execute it on an Android emulator, and verify whether that action achieved the expected result.
 
-I wanted to understand what happens when you give an LLM the ability to interact with a real application.
+What initially looked like a straightforward problem quickly became a far more interesting engineering puzzle. 
 
-Not just generate code or answer questions, but actually look at an application, understand what is happening, decide what to do, perform an action, and determine whether that action achieved the expected result.
+Connecting an LLM to an emulator is relatively easy, but making that interaction reliable for automated blackbox testing is difficult. The primary hurdle isn't model parameter size or prompt wording, but bridging the gap between **stochastic reasoning** and **deterministic execution**. 
 
-Android was a natural environment for me to experiment with, so I started with an emulator.
+In this post, I want to share what I learned through this exploration: why unconstrained tool-calling breaks down, why user intent must be decoupled from UI topology, and how transitioning to a **layered state-graph architecture** made agentic testing predictable.
 
-What initially looked like a simple problem quickly became more interesting.
+## 1. The Cognitive Limits of Unconstrained Tool-Calling
 
-## Giving an LLM hands
-
-The first version was intentionally simple:
+In my first experiments, I took the most intuitive approach: I exposed every available device tool to the LLM inside a single, open-ended prompt loop. In this model, the LLM received the overall task alongside a suite of low-level tools—such as launching apps, inspecting layout trees, tapping coordinates, entering text, and capturing screenshots.
 
 ```text
-User
-  ↓
-LLM
-  ↓
-Tools
-  ↓
-Android Emulator
+               ┌─────────────────────────────────────────┐
+               │         User Request + All Tools        │
+               └────────────────────┬────────────────────┘
+                                    │
+                                    ▼
+                         ┌────────────────────┐
+                         │   Monolithic LLM   │ ◄──┐
+                         └──────────┬─────────┘    │
+                                    │              │ (Infinite Loop)
+                                    ▼              │
+                         ┌────────────────────┐    │
+                         │    Device Tool     │ ───┘
+                         └────────────────────┘
+
 ```
 
-The important part here is the **tools**.
+While conceptually simple, this unconstrained model quickly proved unpredictable for non-trivial workflows:
 
-An LLM cannot directly tap a screen, inspect an Android UI hierarchy, or enter text into an emulator. Tools provide that connection between the model and the environment.
+* **High Cognitive Load & Decision Paralysis:** Forcing the model to simultaneously interpret high-level business goals, parse dense view hierarchies, and choose among dozens of granular tools led to moving action choices.
 
-DroidMind started with relatively low-level capabilities:
 
-* Discover connected devices
-* Find installed applications
-* Launch applications
-* Inspect the UI hierarchy
-* Find UI elements
-* Tap elements
-* Enter text
-* Send key events
-* Scroll
-* Capture screenshots
+* **State Drift:** Without enforced execution boundaries, the model would frequently attempt downstream UI steps before essential prerequisites—such as application launching or device provisioning—were complete.
 
-With these capabilities, it is already possible to give the model a task such as:
 
-> Open "AI Money Transfer" app and Transfer 10 pounds to 00-00-01 12985684 account and verify it is successful.
+* **Context Pollution:** Accumulating raw, unformatted view hierarchies across multiple loop iterations flooded the context window, causing the model to hallucinate UI elements or get stuck in repetitive actions.
 
-The model can inspect the screen, choose a tool, receive the result, and continue.
+## 2. Decoupling Intent from UI Topology
 
-But there is a problem with this approach. The model is being asked to figure out **everything**.
+One of the most important realizations from testing real applications was that **UI layouts are transient, whereas user intent is invariant**.
 
-It has to understand the task, decide what information it needs, interpret the UI, determine which tool to use, perform the action, and decide whether the result is correct.
+Consider a money transfer transaction: the user's intent ("Transfer £10 to a recipient") remains constant across app updates. However, the interface topology used to fulfill that intent can vary dramatically:
 
-That can work for simple interactions. It becomes much less predictable as the task becomes more complex.
+* **Interface Variant A:** Requires tapping an input field, invoking the soft keyboard, and manually typing digits. 
+[Check the recording](videos/manual_amount_entry.mp4)
 
-## The UI is not the intention
+* **Interface Variant B:** Displays contextual quick-select chips (`£10`, `£50`, `£100`) directly next to the input field. [Check the recording](videos/quick_amount_selection.mp4)
 
-Consider a money transfer flow. The intention might be:
-
-> Transfer £10 to a recipient.
-
-That intention is relatively stable. The UI is not.
-
-I have two recordings of the same transfer flow. Both are trying to accomplish the same thing, but the screens are different.
-
-In one version, the user manually enters the transfer amount.
-
-[Executing Money Transfer flow by entering amount manually](videos/manual_amount_entry.mp4)
-
-In the other, the application provides quick amount selections alongside the amount input.
-
-[Executing Money Transfer flow by picking amount](videos/quick_amount_selection.mp4)
-
-The rest of the flow can also change. Buttons can move. Labels can change. Additional screens can appear.
-
-Different UI components can represent the same business action.
-
-Yet from the user's perspective, the intention remains the same:
 
 ```text
-Transfer money
+                       ┌─────────────────────────┐
+                       │      User Intent        │
+                       │   "Set Amount to £10"   │
+                       └────────────┬────────────┘
+                                    │
+                                    ▼
+                       ┌─────────────────────────┐
+                       │    Perception Layer     │
+                       └────────────┬────────────┘
+                                    │
+                  ┌─────────────────┴─────────────────┐
+                  ▼                                   ▼
+        ┌──────────────────┐                ┌──────────────────┐
+        │ Manual Input UI  │                │ Quick Select UI  │
+        ├──────────────────┤                ├──────────────────┤
+        │ 1. Tap Field     │                │ 1. Tap "£10" Chip│
+        │ 2. Type "10"     │                │                  │
+        └──────────────────┘                └──────────────────┘
+
 ```
 
-This distinction is important.
+Traditional test automation scripts break when interface elements change because they are tightly coupled to explicit locators like static resource IDs or absolute XPaths.
 
-If an agent is built around specific UI actions, then these two screens represent two different automation problems.
+An agentic architecture resolves this by introducing an explicit **Perception Abstraction**. Instead of feeding raw Android view trees containing hundreds of layout containers and accessibility nodes to the model, a layout resolver transforms the raw tree into a semantic representation. The agent perceives actionable affordances (e.g., input fields, buttons, options) rather than structural implementation details, allowing it to map a static intention onto changing visual representations.
 
-If the agent is built around the **intention**, they are two representations of the same problem.
+## 3. The Architecture: Layered State-Graph Strategy
 
-That is the abstraction I wanted DroidMind to explore.
+To bring structure and determinism to DroidMind, I replaced the open-ended prompt loop with a **Directed State Graph** strategy ([`SteppedDeviceInteractionStrategy`](https://github.com/cagdasc/droidmind/blob/main/mind/agent/src/commonMain/kotlin/com/cacaosd/droidmind/agent/strategy/SteppedDeviceInteractionStrategy.kt)).
 
-The goal is not to teach the agent how to tap a particular button.
-
-The goal is to give it enough understanding of the environment that it can determine which available action represents the intention **in the current UI**.
-
-## From one prompt to a workflow
-
-My first instinct was to let the LLM handle this itself.
-
-Give it the complete task:
-
-> Open "AI Money Transfer" app and Transfer 10 pounds to 00-00-01 12985684 account and verify it is successful.
-
-Then expose all available tools and let the model decide what to do.
-
-Conceptually:
+In this strategy, execution is modeled as a sequence of discrete, typed states with explicit transitions, session-bound storage, and localized tool scoping.
 
 ```text
-User Request
-     ↓
-    LLM
-     ↓
-  Any Tool
-     ↓
-  Android
-     ↓
-    LLM
-     ↓
-  Any Tool
-     ↓
-    ...
+                      ┌───────────────────────────┐
+                      │    User Request Input     │
+                      └─────────────┬─────────────┘
+                                    │
+                                    ▼
+                      ┌───────────────────────────┐
+                      │  0. Request Classification│ ──(Out of Scope)──► [ Exit / Reject ]
+                      └─────────────┬─────────────┘
+                                    │ (In Scope)
+                                    ▼
+                      ┌───────────────────────────┐
+                      │  1. Rewrite & Plan Task   │ ──► Generates Ordered Plan
+                      └─────────────┬─────────────┘
+                                    │
+                                    ▼
+                      ┌───────────────────────────┐
+                      │  2. Device Identification │ ──► Provision Device & App
+                      └─────────────┬─────────────┘
+                                    │
+                                    ▼
+                      ┌───────────────────────────┐ ◄─────────────────┐
+                      │  3. Step Execution Loop   │                   │
+                      └──────┬─────────────┬──────┘                   │
+                             │             │                          │
+          (Interaction Step) │             │ (Verification Step)      │
+                             ▼             ▼                          │
+                     ┌──────────────┐  ┌──────────────┐               │
+                     │ App          │  │ Interaction  │               │
+                     │ Interaction  │  │ Verification │               │
+                     └──────┬───────┘  └──────┬───────┘               │
+                            │                 │                       │
+                            └────────┬────────┘                       │
+                                     │                                │
+                                     ▼                                │
+                      ┌───────────────────────────┐                   │
+                      │ 4. State & Plan Update    │ ──(Has More Steps)┘
+                      └─────────────┬─────────────┘
+                                    │ (Plan Finished)
+                                    ▼
+                      ┌───────────────────────────┐
+                      │  5. Result Summarization  │ ──► [ Output Final Summary ]
+                      └───────────────────────────┘
+
 ```
 
-This is appealing because it is simple.
+### Stage Breakdown
 
-It is also asking the model to solve too many different problems at once.
+#### Stage 0: Scope Gatekeeping (Classification)
 
-Instead, I started introducing **workflow layers**.
+The initial graph node evaluates whether the incoming request strictly pertains to mobile application testing or device operations. If the request falls outside this domain, the graph terminates immediately, avoiding unnecessary computational overhead.
 
-The idea is to make the process more granular without taking the reasoning away from the LLM.
+#### Stage 1: Goal Decomposition & Planning
 
-The LLM still makes decisions.
+When a request is in scope, a specialized node rewrites the prompt into a structured, ordered plan stored directly in the session context. This plan breaks the goal into atomic steps categorized by type:
 
-But each decision happens within a smaller, more clearly defined responsibility.
+* **`INTERACTION` Steps:** State-changing operations such as launching apps, tapping controls, or typing text.
 
-The architecture started moving towards:
+
+* **`VERIFICATION` Steps:** Non-mutating observation passes designed to inspect interface states and validate outcomes.
+
+
+
+#### Stage 2: Environment Provisioning
+
+Before attempting UI operations, a setup node identifies connected emulators, confirms device readiness, and launches the target application. If provisioning fails, the execution stops with an explicit error rather than attempting invalid UI interactions.
+
+#### Stage 3: Step Dispatching & Tool Scoping
+
+The core execution loop reads the current step from storage and routes the agent to the corresponding node. Crucially, **tool availability is strictly restricted per state**:
+
+* During an **Interaction State**, the model only receives UI hierarchy resolvers and interaction tools.
+
+
+* During a **Verification State**, input tools are stripped away; the model receives only inspection capabilities to evaluate state conditions.
+
+Scoping tools to specific states eliminates tool-selection ambiguity and keeps the model focused on the immediate task.
+
+#### Stage 4 & 5: State Advancement & Summarization
+
+After executing a step, the interaction result is stored, the step index increments, and the graph checks whether more steps remain. Once all steps in the plan are processed, the graph transitions to a final node that aggregates execution logs and generates a summary report.
+
+## 4. Action Is Not Completion: First-Class Verification
+
+Another key finding during this experiment was that executing an action successfully does not guarantee the task succeeded. A tap event can execute perfectly at the OS level while the application remains stuck on the same screen due to validation errors, network delays, or unexpected popups.
+
+In a graph-driven architecture, **verification is treated as an independent execution phase rather than a side effect**.
 
 ```text
-                User Intent
-                     ↓
-                Task Workflow
-                     ↓
-                 Perception
-                     ↓
-                  Decision
-                     ↓
-                Interaction
-                     ↓
-                Verification
-                     ↓
-                  Next Step
+                  ┌───────────────────────────┐
+                  │    Execute Interaction    │
+                  └─────────────┬─────────────┘
+                                │
+                                ▼
+                  ┌───────────────────────────┐
+                  │      Perceive UI Tree     │
+                  └─────────────┬─────────────┘
+                                │
+                                ▼
+                  ┌───────────────────────────┐
+                  │ Evaluate Expected Condition│
+                  └─────────────┬─────────────┘
+                                │
+                      ┌─────────┴─────────┐
+                      ▼                   ▼
+                [ State Valid ]     [ State Invalid ]
+                      │                   │
+                      ▼                   ▼
+               Advance Step Index    Trigger Retry / Strategy
+
 ```
 
-The tools remain the capabilities. The workflow determines **how those capabilities are composed to complete the task**. That distinction turned out to be important.
+By enforcing a dedicated verification pass after key interactions, the agent evaluates state transitions systematically:
 
-## Perception before interaction
+1. **Execution:** The interaction node executes the required action.
 
-One of the first things I learned was that giving the model the raw UI hierarchy is not necessarily useful.
 
-A modern Android screen can contain hundreds of nodes.
+2. **Re-Perception:** The graph re-evaluates the view hierarchy to capture the updated state.
 
-Many of them are irrelevant.
 
-A raw hierarchy might contain containers, layout nodes, accessibility information, bounds, duplicated text and implementation details that have no value for the current task.
+3. **State Assertion:** The verification node confirms whether expected visual anchors (e.g., success messages, updated balances, screen title changes) are present before advancing the plan.
 
-So instead of simply exposing the raw hierarchy, DroidMind transforms it into a representation that is easier for an agent to reason about.
+## 5. Key Takeaways for Agent Engineers
 
-Conceptually:
+* **Tools Are Capabilities; Workflows Are Behaviors:** Low-level capabilities (`tap`, `scroll`, `read_hierarchy`) handle OS interactions without understanding task context. The orchestration graph defines domain behavior by constraining when and how those tools are invoked.
 
-```text
-Android UI
-    ↓
-Raw UI Hierarchy
-    ↓
-Hierarchy Resolver
-    ↓
-Optimised Hierarchy
-    ↓
-Agent
-```
 
-The purpose is not just to reduce tokens.
+* **Isolate Reasoning Contexts:** Minimize cognitive load by splitting multi-step tasks into dedicated graph nodes. An LLM evaluating an assertion should not be burdened by text-entry tools or device-configuration options.
 
-It is to expose the parts of the UI that have semantic meaning for the task.
 
-For example, instead of making the model reason about a large tree of implementation details, it can work with meaningful elements such as:
+* **Perception Precedes Action:** Raw layout trees clutter context windows. Filtering view hierarchies into semantic elements allows the agent to reason about application state rather than layout implementation details.
 
-```text
-Screen
- ├── Amount Input
- ├── Quick Amount: £10
- ├── Quick Amount: £50
- ├── Quick Amount: £100
- ├── Quick Amount: £250
- ├── Account number
- ├── Sort code
- └── Continue
-```
 
-Now the model can reason about the screen rather than the implementation of the screen.
+* **Model Workflows as Typed State Machines:** Utilizing explicit graphs with typed steps, state storage, and conditional transitions converts unpredictable agent behavior into an auditable, reproducible engineering pipeline.
 
-This is where perception becomes a separate layer.
 
-The perception layer answers:
+## 6. Conclusion
 
-> What is currently happening?
+Controlling a mobile application via an AI agent is fundamentally an architectural problem rather than a prompting challenge. While LLMs provide the localized reasoning necessary to adapt to visual variations, the system’s overall reliability depends on the surrounding graph.
 
-It does not decide what the user ultimately wants. It creates the representation that allows the next layer to make that decision.
+By decoupling intent from UI topology, scoping tool accessibility to specific states, and treating verification as a first-class execution phase, we can build agents that operate predictably in complex software environments. The emulator is merely the environment where these interactions take place; the real value lies in the layers engineered between **intention and execution**.
 
-## Workflow layering
-
-Once perception became a separate concern, the rest of the system started to become clearer.
-
-Rather than giving the LLM every possible tool and asking it to figure out the entire workflow, I could define smaller workflow stages around specific responsibilities.
-
-For example:
-
-```text
-      User Request
-           ↓
-┌─────────────────────┐
-│ Intent / Task       │
-│ Understanding       │
-└──────────┬──────────┘
-           ↓
-┌─────────────────────┐
-│ Perception          │
-│ Understand UI       │
-└──────────┬──────────┘
-           ↓
-┌─────────────────────┐
-│ Action              │
-│ Decide what to do   │
-└──────────┬──────────┘
-           ↓
-┌─────────────────────┐
-│ Interaction         │
-│ Execute action      │
-└──────────┬──────────┘
-           ↓
-┌─────────────────────┐
-│ Verification        │
-│ Check result        │
-└─────────────────────┘
-```
-
-This does not mean that every layer is deterministic. Quite the opposite. The LLM can still reason inside these layers.
-
-The difference is that the reasoning is constrained by a specific responsibility.
-
-For example, the interaction layer does not need to figure out what the entire user request means.
-
-It needs to answer a much smaller question:
-
-> Given the current UI and the current intended action, how should I perform this action?
-
-That makes the toolset and the context available to the model much more focused.
-
-## The same intention, different UI
-
-This is where the two transfer screens become useful. Imagine the agent has reached the amount step.
-
-The intended action is:
-
-```text
-Enter £10
-```
-
-On one screen, the correct interaction might be:
-
-```text
-Tap Amount
-→ Input "10"
-```
-
-On another:
-
-```text
-Tap Quick Amount "£10"
-```
-
-A traditional automation script might require two separate implementations.
-
-The agent does not necessarily need to know that these are two different test cases.
-
-It needs to perceive both screens and map the same intention to the appropriate interaction.
-
-So the workflow becomes:
-
-```text
-              Intended Action
-                    │
-                    ↓
-             "Set amount to £10"
-                    │
-                    ↓
-               Perception
-                    │
-          ┌─────────┴─────────┐
-          ↓                   ↓
-     Amount Input        Quick Amount
-          │                   │
-          ↓                   ↓
-      Enter "10"           Tap "£10"
-```
-
-The UI changed but the **workflow did not**. That is the abstraction I am interested in.
-
-## Interaction is not completion
-
-Another important distinction appeared when I started adding verification.
-
-Performing an action successfully does not necessarily mean the task succeeded.
-
-A tap can be executed correctly while the application moves into an unexpected state.
-
-Text can be entered into the wrong field or a button can be pressed while a validation error remains on screen. The agent therefore needs to understand not only:
-
-> What action should I perform?
-
-but also:
-
-> Did that action produce the state I expected?
-
-This introduced verification as a first-class layer.
-
-```text
-Perceive
-   ↓
-Decide
-   ↓
-Interact
-   ↓
-Perceive again
-   ↓
-Verify
-```
-
-For the transfer example, the workflow might look like:
-
-```text
-1. Navigate to transfer
-2. Set transfer amount
-3. Select recipient
-4. Review transfer details
-5. Confirm transfer
-6. Verify transfer success
-```
-
-The interesting part is that not every step is an interaction. Some steps are about understanding the current state. Some are about changing it. Some are about proving that the expected state was reached.
-
-This makes the workflow more explicit:
-
-```text
-             ┌─────────────┐
-             │    Intent   │
-             └──────┬──────┘
-                    ↓
-               Perception
-                    ↓
-                Decision
-                    ↓
-               Interaction
-                    ↓
-               Perception
-                    ↓
-               Verification
-                    │
-             ┌──────┴──────┐
-             ↓             ↓
-          Success        Failure
-             │
-             ↓
-         Next Step
-```
-
-## Why make it more granular?
-
-At this point, the obvious question is:
-
-> Why not just give the LLM the whole task and let it figure everything out?
-
-Because the objective is not simply to make the model capable of calling tools.
-
-It is to build an agent that can operate an environment in a way that is understandable, controllable and reusable.
-
-A single large reasoning loop makes it difficult to understand why an action was chosen.
-
-With a more granular workflow, each stage has a clearer contract.
-
-For example:
-
-**Perception**
-
-> Understand the current application state.
-
-**Interaction**
-
-> Execute the intended action using the current UI.
-
-**Verification**
-
-> Determine whether the expected state has been reached.
-
-The model can still reason.
-
-But it is reasoning about the right problem at the right time. This also means that improvements to one layer do not necessarily require changing everything else.
-
-A better hierarchy representation can improve perception.
-
-A better interaction layer can improve action selection.
-
-A better verification layer can improve confidence in the result.
-
-The layers give those improvements somewhere to live.
-
-## Tools are capabilities, workflows define behaviour
-
-This became one of the most important architectural distinctions in DroidMind.
-
-Tools answer:
-
-> What can the agent do?
-
-Workflows answer:
-
-> How should those capabilities be composed to complete the task?
-
-For example, a `tap` tool is a capability.
-
-It knows how to tap a coordinate or UI element.
-
-It does not know whether tapping that element makes sense for the current task.
-
-Similarly, a UI hierarchy tool can retrieve the current screen.
-
-It does not know which part of that screen matters.
-
-That responsibility belongs to the workflow.
-
-So the architecture becomes:
-
-```text
-                  Agent
-                    │
-              ┌─────┴─────┐
-              │  Workflow │
-              └─────┬─────┘
-                    │
-          ┌─────────┼─────────┐
-          ↓         ↓         ↓
-     Perception  Interaction  Verification
-          │         │         │
-          └─────────┼─────────┘
-                    ↓
-                  Tools
-                    ↓
-              Android Device
-```
-
-This separation is what makes the system interesting to me.
-
-The tools are relatively straightforward.
-
-The difficult part is deciding how those tools should be composed into behaviour.
-
-## The emulator is just the environment
-
-When I started DroidMind, I thought the interesting question would be:
-
-> How do I make an LLM control an Android emulator?
-
-I don't think that is the interesting question anymore.
-
-The emulator is just an environment where the problem becomes visible.
-
-The more interesting question is:
-
-> How should an agent understand an environment well enough to act on an intention rather than simply react to UI elements?
-
-The two transfer screens illustrate that problem quite well.
-
-The UI can change.
-
-The intention can remain the same.
-
-If the agent is tightly coupled to the UI implementation, every change becomes another automation problem.
-
-If the agent can perceive the environment, reason about the current state, and select an appropriate interaction workflow, the UI becomes an implementation detail rather than the definition of the task.
-
-That is what I am exploring with DroidMind.
-
-Not simply giving an LLM more tools.
-
-Not simply making it click buttons.
-
-But building the layers between **intention and action** that allow the model to understand what those tools mean in the environment it is operating in.
-
-And I suspect that the quality of those layers may matter just as much as the model itself.
+To explore the strategy implementation, check out the **[DroidMind repository on GitHub](https://github.com/cagdasc/droidmind)**.
