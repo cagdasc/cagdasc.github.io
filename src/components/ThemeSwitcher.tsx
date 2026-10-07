@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sun, Moon, Check, Palette, ChevronDown } from 'lucide-react';
 import { useTheme, THEME_OPTIONS, ThemeId } from '../context/ThemeContext';
-import { trackEvent } from '../utils/analytics';
+import { trackEvent, trackThemeChange } from '../utils/analytics';
 
 export const ThemeSwitcher: React.FC = () => {
   const { theme, setTheme, isDark, toggleTheme, currentOption } = useTheme();
@@ -68,6 +68,8 @@ export const ThemeSwitcher: React.FC = () => {
         id="theme-quick-toggle"
         onClick={() => {
           toggleTheme();
+          const targetTheme = isDark ? 'light-oat' : 'forest-pine';
+          trackThemeChange(targetTheme);
           trackEvent('toggle_dark_mode', { new_mode: isDark ? 'light' : 'dark' });
         }}
         className="p-2 sm:p-2.5 rounded-xl transition-all duration-150 flex items-center justify-center border text-xs font-semibold shadow-2xs cursor-pointer select-none"
@@ -182,6 +184,7 @@ export const ThemeSwitcher: React.FC = () => {
                       onClick={() => {
                         setTheme(opt.id);
                         setIsOpen(false);
+                        trackThemeChange(opt.id);
                         trackEvent('select_theme', { theme_id: opt.id, theme_name: opt.name });
                       }}
                       className={`w-full text-left p-2.5 sm:p-3 rounded-xl border transition-all duration-150 flex items-center justify-between gap-3 group cursor-pointer ${

@@ -16,7 +16,18 @@ import {
 } from 'lucide-react';
 import { BlogPost } from '../types';
 import { blogPostsData } from '../data/posts';
-import { trackEvent } from '../utils/analytics';
+import { 
+  trackEvent, 
+  trackArticleOpen, 
+  trackTocClick, 
+  trackScrollDepth, 
+  trackReadingTime, 
+  trackCopyCodeSnippet, 
+  trackShareArticle, 
+  trackExternalLinkClick 
+} from '../utils/analytics';
+
+const ArticleSlugContext = React.createContext<string>('');
 
 interface ArticleReaderProps {
   post: BlogPost;
@@ -48,6 +59,7 @@ const extractNodeText = (node: React.ReactNode): string => {
 // Custom Code block renderer for fenced code blocks
 const PreBlock: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [copied, setCopied] = useState(false);
+  const articleSlug = React.useContext(ArticleSlugContext);
 
   // Extract code text and language from inner <code> child
   let codeText = '';
@@ -68,6 +80,9 @@ const PreBlock: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     navigator.clipboard.writeText(codeText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    if (articleSlug) {
+      trackCopyCodeSnippet(articleSlug, language || 'code');
+    }
   };
 
   return (
@@ -153,6 +168,8 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [tableOfContents, setTableOfContents] = useState<{ id: string; text: string }[]>([]);
 
+  const reachedMilestones = React.useRef<Set<number>>(new Set());
+
   const scrollToHeading = (id: string, smooth: boolean = true) => {
     const element = document.getElementById(id);
     if (element) {
@@ -170,6 +187,25 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
   };
 
   useEffect(() => {
+    // Track article open
+    trackArticleOpen(post.slug, post.title, post.category);
+    reachedMilestones.current = new Set();
+
+    // Reading time tracker (15s, 30s, 60s, 120s, 300s)
+    const startTime = Date.now();
+    const intervals = [15, 30, 60, 120, 300];
+    const firedIntervals = new Set<number>();
+
+    const readingTimer = setInterval(() => {
+      const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+      intervals.forEach((sec) => {
+        if (elapsedSec >= sec && !firedIntervals.has(sec)) {
+          firedIntervals.add(sec);
+          trackReadingTime(post.slug, sec);
+        }
+      });
+    }, 4000);
+
     // Extract H2 headings for Table of Contents
     const headings: { id: string; text: string }[] = [];
     const lines = post.content.split('\n');
@@ -198,7 +234,10 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
       const timer = setTimeout(() => {
         scrollToHeading(targetSectionId!, true);
       }, 150);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        clearInterval(readingTimer);
+      };
     } else {
       // Scroll to top upon opening article
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -210,15 +249,28 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
       if (windowHeight > 0) {
         const scrollPercent = (totalScroll / windowHeight) * 100;
         setScrollProgress(scrollPercent);
+
+        // Milestone scroll depth tracking (25%, 50%, 75%, 100%)
+        const milestones: (25 | 50 | 75 | 100)[] = [25, 50, 75, 100];
+        milestones.forEach((m) => {
+          if (scrollPercent >= m && !reachedMilestones.current.has(m)) {
+            reachedMilestones.current.add(m);
+            trackScrollDepth(post.slug, m);
+          }
+        });
       }
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearInterval(readingTimer);
+    };
   }, [post]);
 
-  const handleTocClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+  const handleTocClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string, text: string) => {
     e.preventDefault();
+    trackTocClick(post.slug, id, text);
     scrollToHeading(id, true);
 
     // Safely update browser URL without replacing the blog route or triggering tab switch
@@ -245,34 +297,35 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
-    trackEvent('copy_article_link', { article_slug: post.slug, article_title: post.title });
+    trackShareArticle(post.slug, 'clipboard');
   };
 
   const handleShareTwitter = () => {
     const text = `"${post.title}" by Cagdas Caglak`;
     const url = getCanonicalUrl();
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-    trackEvent('share_article', { platform: 'twitter', article_slug: post.slug });
+    trackShareArticle(post.slug, 'twitter');
   };
 
   const handleShareLinkedIn = () => {
     const url = getCanonicalUrl();
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-    trackEvent('share_article', { platform: 'linkedin', article_slug: post.slug });
+    trackShareArticle(post.slug, 'linkedin');
   };
 
   // Find related posts
   const otherPosts = blogPostsData.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
-    <article 
-      id="article-reader-view" 
-      className="pt-24 pb-20 relative transition-colors duration-200"
-      style={{
-        backgroundColor: 'var(--app-bg)',
-        color: 'var(--app-text)',
-      }}
-    >
+    <ArticleSlugContext.Provider value={post.slug}>
+      <article 
+        id="article-reader-view" 
+        className="pt-24 pb-20 relative transition-colors duration-200"
+        style={{
+          backgroundColor: 'var(--app-bg)',
+          color: 'var(--app-text)',
+        }}
+      >
       
       {/* Top Reading Progress Bar */}
       <div 
@@ -408,7 +461,7 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
                 <a
                   key={idx}
                   href={`#${item.id}`}
-                  onClick={(e) => handleTocClick(e, item.id)}
+                  onClick={(e) => handleTocClick(e, item.id, item.text)}
                   className="block text-xs sm:text-sm transition-colors py-1 hover:underline cursor-pointer group"
                   style={{ color: 'var(--app-text-secondary)' }}
                 >
@@ -468,6 +521,11 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    if (href) {
+                      trackExternalLinkClick(href, extractNodeText(children), 'article_body');
+                    }
+                  }}
                   className="underline underline-offset-4 font-medium transition-all"
                   style={{ 
                     color: 'var(--app-accent)',
@@ -657,5 +715,6 @@ export const ArticleReader: React.FC<ArticleReaderProps> = ({
 
       </div>
     </article>
+    </ArticleSlugContext.Provider>
   );
 };

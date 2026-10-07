@@ -1,0 +1,5 @@
+# robots.txt for https://cagdas.caglak.cc/
+User-agent: *
+Allow: /
+
+Sitemap: https://cagdas.caglak.cc/sitemap.xml

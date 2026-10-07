@@ -67,8 +67,12 @@ function replaceMeta(html, { title, description, url, image, type = 'article', j
 
   // Schema.org JSON-LD
   if (jsonLd) {
-    const jsonLdTag = `  <script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n  </script>\n`;
-    result = result.replace('</head>', `${jsonLdTag}</head>`);
+    const jsonLdTag = `  <script id="schema-jsonld" type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n  </script>\n`;
+    if (result.includes('<script id="schema-jsonld"')) {
+      result = result.replace(/<script id="schema-jsonld"[\s\S]*?<\/script>/, jsonLdTag.trim());
+    } else {
+      result = result.replace('</head>', `${jsonLdTag}</head>`);
+    }
   }
 
   return result;

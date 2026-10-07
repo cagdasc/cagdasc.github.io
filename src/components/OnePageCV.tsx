@@ -21,7 +21,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { profileData, experiencesData, skillCategoriesData, projectsData, talksData, educationData } from '../data/cvData';
-import { trackEvent } from '../utils/analytics';
+import { trackCopyEmail, trackPrintCV, trackContactClick } from '../utils/analytics';
 
 interface OnePageCVProps {
   onGoToBlog: () => void;
@@ -34,11 +34,11 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
     navigator.clipboard.writeText(profileData.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
-    trackEvent('copy_email', { email: profileData.email });
+    trackCopyEmail('header');
   };
 
   const handlePrint = () => {
-    trackEvent('print_cv');
+    trackPrintCV('print_button');
     window.print();
   };
 
@@ -89,7 +89,8 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
             <div className="flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5" style={{ color: 'var(--app-accent)' }} />
               <a 
-                href={`mailto:${profileData.email}`} 
+                href={`mailto:${profileData.email}`}
+                onClick={() => trackContactClick('email', `mailto:${profileData.email}`)}
                 className="font-medium transition-colors hover:underline"
                 style={{ color: 'var(--app-text)' }}
               >
@@ -109,6 +110,7 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
               href={profileData.github} 
               target="_blank" 
               rel="noopener noreferrer"
+              onClick={() => trackContactClick('github', profileData.github)}
               className="flex items-center gap-1.5 transition-colors hover:opacity-80"
               style={{ color: 'var(--app-text-secondary)' }}
             >
@@ -120,6 +122,7 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
               href={profileData.linkedin} 
               target="_blank" 
               rel="noopener noreferrer"
+              onClick={() => trackContactClick('linkedin', profileData.linkedin)}
               className="flex items-center gap-1.5 transition-colors hover:opacity-80"
               style={{ color: 'var(--app-text-secondary)' }}
             >

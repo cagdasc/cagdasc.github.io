@@ -8,7 +8,7 @@ import { Footer } from './components/Footer';
 import { PrintCVView } from './components/PrintCVView';
 import { blogPostsData } from './data/posts';
 import { ThemeProvider } from './context/ThemeContext';
-import { initGA, trackPageView } from './utils/analytics';
+import { initGA, trackPageView, trackTabSwitch } from './utils/analytics';
 import { updateDocumentMeta } from './utils/meta';
 
 function AppContent() {
@@ -115,6 +115,7 @@ function AppContent() {
     let url = `${window.location.origin}/`;
     let image = `${window.location.origin}/og/cv.png`;
     let type = 'website';
+    let jsonLd: Record<string, any> | null = null;
 
     if (activeTab === 'blog') {
       if (selectedArticleSlug && activeArticle) {
@@ -124,13 +125,81 @@ function AppContent() {
         url = `${window.location.origin}/blog/${selectedArticleSlug}`;
         image = `${window.location.origin}/og/${selectedArticleSlug}.png`;
         type = 'article';
+        jsonLd = {
+          '@context': 'https://schema.org',
+          '@type': 'TechArticle',
+          'headline': activeArticle.title,
+          'description': activeArticle.summary,
+          'image': image,
+          'datePublished': activeArticle.publishedAt,
+          'author': {
+            '@type': 'Person',
+            'name': 'Cagdas Caglak',
+            'url': 'https://cagdas.caglak.cc/'
+          },
+          'publisher': {
+            '@type': 'Person',
+            'name': 'Cagdas Caglak'
+          },
+          'mainEntityOfPage': {
+            '@type': 'WebPage',
+            '@id': url
+          },
+          'keywords': activeArticle.tags.join(', ')
+        };
       } else {
         path = '#blog';
         title = 'Blog & Technical Articles | Cagdas Caglak';
         description = 'A collection of experiments, technical findings, and lessons learned from building software.';
         url = `${window.location.origin}/blog`;
         image = `${window.location.origin}/og/blog.png`;
+        jsonLd = {
+          '@context': 'https://schema.org',
+          '@type': 'CollectionPage',
+          'name': 'Blog & Technical Articles | Cagdas Caglak',
+          'description': description,
+          'url': url,
+          'author': {
+            '@type': 'Person',
+            'name': 'Cagdas Caglak',
+            'url': 'https://cagdas.caglak.cc/'
+          }
+        };
       }
+    } else {
+      jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        'mainEntity': {
+          '@type': 'Person',
+          'name': 'Cagdas Caglak',
+          'jobTitle': 'Senior Android Developer',
+          'worksFor': {
+            '@type': 'Organization',
+            'name': 'J.P. Morgan (Nutmeg)',
+            'url': 'https://www.nutmeg.com'
+          },
+          'url': 'https://cagdas.caglak.cc/',
+          'sameAs': [
+            'https://github.com/cagdasc',
+            'https://linkedin.com/in/cagdascaglak',
+            'https://twitter.com/cagdascaglak',
+            'https://medium.com/@cagdascaglak'
+          ],
+          'knowsAbout': [
+            'Android Development',
+            'Kotlin',
+            'Jetpack Compose',
+            'Kotlin Multiplatform',
+            'KSP',
+            'Paparazzi',
+            'Coroutines & Flow',
+            'Clean Architecture',
+            'AI Tooling',
+            'Developer Experience'
+          ]
+        }
+      };
     }
 
     // Update document title & OpenGraph tags in live DOM
@@ -140,6 +209,7 @@ function AppContent() {
       url,
       image,
       type,
+      jsonLd,
     });
 
     trackPageView(path, title);
@@ -158,6 +228,7 @@ function AppContent() {
   };
 
   const handleTabChange = (tab: 'cv' | 'blog') => {
+    trackTabSwitch(tab);
     setActiveTab(tab);
     if (tab === 'cv') {
       setSelectedArticleSlug(null);

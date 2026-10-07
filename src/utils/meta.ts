@@ -4,6 +4,7 @@ export interface ClientMetaOptions {
   url?: string;
   image?: string;
   type?: string;
+  jsonLd?: Record<string, any> | null;
 }
 
 function setMetaTag(selector: string, attributeName: string, attributeValue: string, content: string) {
@@ -14,6 +15,33 @@ function setMetaTag(selector: string, attributeName: string, attributeValue: str
     document.head.appendChild(element);
   }
   element.setAttribute('content', content);
+}
+
+function setCanonicalUrl(url: string) {
+  let link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', url);
+}
+
+function setStructuredData(jsonLd: Record<string, any> | null | undefined) {
+  const existingScript = document.getElementById('schema-jsonld');
+  if (!jsonLd) {
+    if (existingScript) existingScript.remove();
+    return;
+  }
+
+  let script = existingScript as HTMLScriptElement | null;
+  if (!script) {
+    script = document.createElement('script');
+    script.id = 'schema-jsonld';
+    script.type = 'application/ld+json';
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(jsonLd, null, 2);
 }
 
 export function updateDocumentMeta(options: ClientMetaOptions) {
@@ -47,4 +75,14 @@ export function updateDocumentMeta(options: ClientMetaOptions) {
   setMetaTag('meta[name="twitter:description"]', 'name', 'twitter:description', options.description);
   setMetaTag('meta[name="twitter:image"]', 'name', 'twitter:image', imageUrl);
   setMetaTag('meta[name="twitter:card"]', 'name', 'twitter:card', 'summary_large_image');
+  setMetaTag('meta[name="twitter:creator"]', 'name', 'twitter:creator', '@cagdascaglak');
+  setMetaTag('meta[name="twitter:site"]', 'name', 'twitter:site', '@cagdascaglak');
+
+  // 5. Canonical Link
+  setCanonicalUrl(currentUrl);
+
+  // 6. Schema.org JSON-LD Structured Data
+  if (options.jsonLd !== undefined) {
+    setStructuredData(options.jsonLd);
+  }
 }
