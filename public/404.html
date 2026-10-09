@@ -17,6 +17,12 @@
           return;
         }
 
+        // Match /links, /links/, /linktree, /bio
+        if (pathname === '/links' || pathname === '/links/' || pathname === '/linktree' || pathname === '/bio') {
+          window.location.replace('/#links');
+          return;
+        }
+
         // Match /blog or /blog/
         if (pathname === '/blog' || pathname === '/blog/') {
           window.location.replace('/#blog');

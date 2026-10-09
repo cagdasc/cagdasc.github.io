@@ -152,4 +152,34 @@ posts.forEach((post) => {
   console.log(`Generated: dist/blog/${post.slug}/index.html`);
 });
 
-console.log('All static blog pages pre-rendered successfully!');
+// 3. Generate /links/index.html
+const linksDir = path.join(distDir, 'links');
+if (!fs.existsSync(linksDir)) {
+  fs.mkdirSync(linksDir, { recursive: true });
+}
+
+const linksIndexHtml = replaceMeta(baseTemplate, {
+  title: 'Cagdas Caglak | Links & Bio',
+  description: 'Quick links to Cagdas Caglak\'s GitHub, LinkedIn, Personal Portfolio, Engineering Articles, and Droidcon London 2025 presentation.',
+  url: 'https://cagdas.caglak.cc/links',
+  image: 'https://cagdas.caglak.cc/og/cv.png',
+  type: 'profile',
+  assetPrefix: '../',
+  jsonLd: {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    'name': 'Cagdas Caglak | Quick Links & Bio',
+    'url': 'https://cagdas.caglak.cc/links',
+    'mainEntity': {
+      '@type': 'Person',
+      'name': 'Cagdas Caglak',
+      'jobTitle': 'Senior Android Developer',
+      'url': 'https://cagdas.caglak.cc/'
+    }
+  }
+});
+
+fs.writeFileSync(path.join(linksDir, 'index.html'), linksIndexHtml, 'utf8');
+console.log('Generated: dist/links/index.html');
+
+console.log('All static blog and links pages pre-rendered successfully!');

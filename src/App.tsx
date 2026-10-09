@@ -6,13 +6,14 @@ import { ArticleReader } from './components/ArticleReader';
 import { GitHubWorkflowModal } from './components/GitHubWorkflowModal';
 import { Footer } from './components/Footer';
 import { PrintCVView } from './components/PrintCVView';
+import { LinktreePage } from './components/LinktreePage';
 import { blogPostsData } from './data/posts';
 import { ThemeProvider } from './context/ThemeContext';
 import { initGA, trackPageView, trackTabSwitch } from './utils/analytics';
 import { updateDocumentMeta } from './utils/meta';
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<'cv' | 'blog'>('cv');
+  const [activeTab, setActiveTab] = useState<'cv' | 'blog' | 'links'>('cv');
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
   const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState<boolean>(false);
 
@@ -21,12 +22,23 @@ function AppContent() {
     initGA();
   }, []);
 
-  // Universal Route Synchronizer (Handles /blog/:slug, query ?post=..., and hash #blog/:slug)
+  // Universal Route Synchronizer (Handles /blog/:slug, /links, query ?post=..., and hash #links, #blog/:slug)
   useEffect(() => {
     const parseCurrentRoute = () => {
       const pathname = window.location.pathname;
       const searchParams = new URLSearchParams(window.location.search);
       const rawHash = window.location.hash.replace(/^#\/?/, '');
+
+      // Check URL-only linktree page (/links, /linktree, /bio, or hash #links, #linktree, #bio)
+      const isLinksPath = /^\/(?:links|linktree|bio)\/?$/.test(pathname);
+      const isLinksHash = rawHash === 'links' || rawHash === 'linktree' || rawHash === 'bio';
+      const isLinksQuery = searchParams.get('page') === 'links' || searchParams.get('view') === 'links' || searchParams.has('links');
+
+      if (isLinksPath || isLinksHash || isLinksQuery) {
+        setActiveTab('links');
+        setSelectedArticleSlug(null);
+        return;
+      }
 
       // 1. Check path e.g. /blog/agent-behind-the-emulator or /posts/agent-behind-the-emulator
       const pathMatch = pathname.match(/^\/(?:blog|posts)\/([a-zA-Z0-9_-]+)/);
@@ -117,7 +129,37 @@ function AppContent() {
     let type = 'website';
     let jsonLd: Record<string, any> | null = null;
 
-    if (activeTab === 'blog') {
+    if (activeTab === 'links') {
+      path = '#links';
+      title = 'Cagdas Caglak | Links & Bio';
+      description = 'Connect with Cagdas Caglak: GitHub, LinkedIn, Personal Portfolio, Engineering Articles, and Droidcon London presentation.';
+      url = `${window.location.origin}/links`;
+      image = `${window.location.origin}/og/cv.png`;
+      type = 'profile';
+      jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        'name': 'Cagdas Caglak | Quick Links & Bio',
+        'url': url,
+        'mainEntity': {
+          '@type': 'Person',
+          'name': 'Cagdas Caglak',
+          'jobTitle': 'Senior Android Developer',
+          'worksFor': {
+            '@type': 'Organization',
+            'name': 'J.P. Morgan (Nutmeg)',
+            'url': 'https://www.nutmeg.com'
+          },
+          'url': 'https://cagdas.caglak.cc/',
+          'sameAs': [
+            'https://github.com/cagdasc',
+            'https://linkedin.com/in/cagdascaglak',
+            'https://twitter.com/cagdascaglak',
+            'https://medium.com/@cagdascaglak'
+          ]
+        }
+      };
+    } else if (activeTab === 'blog') {
       if (selectedArticleSlug && activeArticle) {
         path = `#blog/${selectedArticleSlug}`;
         title = `${activeArticle.title} | Cagdas Caglak`;
@@ -227,15 +269,18 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleTabChange = (tab: 'cv' | 'blog') => {
+  const handleTabChange = (tab: 'cv' | 'blog' | 'links') => {
     trackTabSwitch(tab);
     setActiveTab(tab);
     if (tab === 'cv') {
       setSelectedArticleSlug(null);
       window.location.hash = 'cv';
-    } else {
+    } else if (tab === 'blog') {
       setSelectedArticleSlug(null);
       window.location.hash = 'blog';
+    } else {
+      setSelectedArticleSlug(null);
+      window.location.hash = 'links';
     }
   };
 
@@ -247,46 +292,58 @@ function AppContent() {
         color: 'var(--app-text)',
       }}
     >
-      {/* Top Fixed Navbar */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={handleTabChange}
-        onOpenWorkflowModal={() => setIsWorkflowModalOpen(true)}
-        activeArticleSlug={selectedArticleSlug}
-      />
+      {/* If activeTab is 'links', display the standalone Linktree page with no standard Navbar/Footer */}
+      {activeTab === 'links' ? (
+        <div className="animate-in fade-in duration-200 w-full">
+          <LinktreePage 
+            onNavigateHome={() => handleTabChange('cv')}
+            onNavigateBlog={() => handleTabChange('blog')}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Top Fixed Navbar for main CV / Blog */}
+          <Navbar
+            activeTab={activeTab === 'blog' ? 'blog' : 'cv'}
+            setActiveTab={(t) => handleTabChange(t)}
+            onOpenWorkflowModal={() => setIsWorkflowModalOpen(true)}
+            activeArticleSlug={selectedArticleSlug}
+          />
 
-      {/* Main View Content */}
-      <main className="no-print">
-        {activeTab === 'cv' ? (
-          <div className="animate-in fade-in duration-200">
-            <OnePageCV onGoToBlog={() => handleTabChange('blog')} />
-          </div>
-        ) : (
-          <div className="animate-in fade-in duration-200">
-            {activeArticle ? (
-              <ArticleReader
-                post={activeArticle}
-                onBack={handleBackToBlogList}
-                onSelectArticle={handleSelectArticle}
-              />
+          {/* Main View Content */}
+          <main className="no-print">
+            {activeTab === 'cv' ? (
+              <div className="animate-in fade-in duration-200">
+                <OnePageCV onGoToBlog={() => handleTabChange('blog')} />
+              </div>
             ) : (
-              <BlogSection onSelectArticle={handleSelectArticle} />
+              <div className="animate-in fade-in duration-200">
+                {activeArticle ? (
+                  <ArticleReader
+                    post={activeArticle}
+                    onBack={handleBackToBlogList}
+                    onSelectArticle={handleSelectArticle}
+                  />
+                ) : (
+                  <BlogSection onSelectArticle={handleSelectArticle} />
+                )}
+              </div>
             )}
-          </div>
-        )}
-      </main>
+          </main>
 
-      {/* Footer */}
-      <Footer />
+          {/* Footer */}
+          <Footer />
 
-      {/* GitHub Workflow Modal */}
-      <GitHubWorkflowModal
-        isOpen={isWorkflowModalOpen}
-        onClose={() => setIsWorkflowModalOpen(false)}
-      />
+          {/* GitHub Workflow Modal */}
+          <GitHubWorkflowModal
+            isOpen={isWorkflowModalOpen}
+            onClose={() => setIsWorkflowModalOpen(false)}
+          />
 
-      {/* High-Resolution Clean Print / PDF Resume View */}
-      <PrintCVView />
+          {/* High-Resolution Clean Print / PDF Resume View */}
+          <PrintCVView />
+        </>
+      )}
     </div>
   );
 }
