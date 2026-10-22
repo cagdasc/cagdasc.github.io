@@ -233,14 +233,29 @@ export const LinktreePage: React.FC<LinktreePageProps> = ({ onNavigateHome, onNa
                 backgroundColor: 'var(--app-surface)',
               }}
             >
-              <div 
-                className="w-full h-full rounded-full flex flex-col items-center justify-center font-heading font-extrabold text-2xl sm:text-3xl text-white shadow-inner"
-                style={{
-                  background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 50%, #0F172A 100%)',
-                }}
-              >
-                <span>ÇÇ</span>
-              </div>
+              {linksProfileData.avatarUrl ? (
+                <img 
+                  src={linksProfileData.avatarUrl} 
+                  alt={linksProfileData.name} 
+                  className="w-full h-full rounded-full object-cover select-none"
+                  onError={(e) => {
+                    // Fallback to GitHub avatar direct link if local fails, or monogram
+                    const target = e.currentTarget;
+                    if (!target.src.includes('avatars.githubusercontent.com')) {
+                      target.src = 'https://avatars.githubusercontent.com/u/5076468';
+                    }
+                  }}
+                />
+              ) : (
+                <div 
+                  className="w-full h-full rounded-full flex flex-col items-center justify-center font-heading font-extrabold text-2xl sm:text-3xl text-white shadow-inner"
+                  style={{
+                    background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 50%, #0F172A 100%)',
+                  }}
+                >
+                  <span>ÇÇ</span>
+                </div>
+              )}
             </div>
 
             {/* Verified badge */}

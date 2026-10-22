@@ -32,6 +32,7 @@ export interface LinksProfile {
 export const linksProfileData: LinksProfile = {
   name: 'Cagdas Caglak',
   handle: '@cagdasc',
+  avatarUrl: '/images/github_avatar.png',
   title: 'Senior Android Developer',
   company: 'J.P. Morgan Chase',
   location: 'London, United Kingdom',
