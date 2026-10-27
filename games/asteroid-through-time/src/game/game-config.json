@@ -1,0 +1,18 @@
+{
+  "corridorBaseHeight": 330,
+  "corridorMinHeight": 230,
+  "fluctuationAmplitude": 75,
+  "fluctuationFrequency": 0.0032,
+  "scrollSpeed": 180,
+  "gravity": 820,
+  "upwardImpulse": -340,
+  "godMode": false,
+  "wormholeSpawnChance": 0.40,
+  "blackholeSpawnChance": 0.35,
+  "variableGravityOnHold": true,
+  "holdGravityMode": "progressive_float",
+  "holdMaxDuration": 0.45,
+  "holdGravityMultiplier": 0.22,
+  "holdThrustPower": 650
+}
+

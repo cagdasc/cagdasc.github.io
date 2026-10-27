@@ -1,0 +1,6 @@
+{
+  "name": "Asteroid Through Time",
+  "description": "Physics-based cosmic arcade runner where an asteroid journeys through a prehistoric space-cave anomaly across millions of years.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
