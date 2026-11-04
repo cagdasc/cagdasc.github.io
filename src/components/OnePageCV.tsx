@@ -290,32 +290,34 @@ export const OnePageCV: React.FC<OnePageCVProps> = ({ onGoToBlog }) => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Conference Speaking */}
-            <div 
-              className="p-4 rounded-2xl border space-y-2"
-              style={{
-                backgroundColor: 'var(--app-surface-subtle)',
-                borderColor: 'var(--app-border)',
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <span 
-                  className="text-[11px] font-mono font-bold uppercase"
-                  style={{ color: 'var(--app-accent)' }}
-                >
-                  Conference Speaker
-                </span>
-                <span className="text-xs font-mono" style={{ color: 'var(--app-text-muted)' }}>
-                  October 2025
-                </span>
-              </div>
-              <h3 className="text-sm font-bold" style={{ color: 'var(--app-text)' }}>
-                Droidcon London 2025
-              </h3>
-              <p className="text-xs leading-relaxed" style={{ color: 'var(--app-text-secondary)' }}>
-                <strong>"Android Screenshot Testing on Autopilot"</strong> — Automated Paparazzi & KSP code generation for Jetpack Compose previews without writing test boilerplate.
-              </p>
-            </div>            
+            {talksData.map((talk) => (
+              <div 
+                key={talk.id}
+                className="p-4 rounded-2xl border space-y-2"
+                style={{
+                  backgroundColor: 'var(--app-surface-subtle)',
+                  borderColor: 'var(--app-border)',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span 
+                    className="text-[11px] font-mono font-bold uppercase"
+                    style={{ color: 'var(--app-accent)' }}
+                  >
+                    {talk.conference}
+                  </span>
+                  <span className="text-xs font-mono" style={{ color: 'var(--app-text-muted)' }}>
+                    {talk.date}
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold" style={{ color: 'var(--app-text)' }}>
+                  {talk.title}
+                </h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--app-text-secondary)' }}>
+                  {talk.description}
+                </p>
+              </div>            
+            ))}
           </div>
         </section>
 

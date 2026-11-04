@@ -166,6 +166,17 @@ export const projectsData: ProjectItem[] = [
 
 export const talksData: TalkItem[] = [
   {
+    id: 'devfest-hamburg-2026',
+    title: 'Android Screenshot Testing on Autopilot',
+    conference: 'DevFest Hamburg 2026',
+    date: '2026',
+    location: 'Hamburg, Germany',
+    badge: 'Featured Speaker',
+    description: 'Delivered an in-depth technical talk exploring how to eliminate UI regression test maintenance by connecting Jetpack Compose @Preview annotations directly to Paparazzi screenshot engines via Kotlin Symbol Processing (KSP) and custom Gradle automation.',
+    topics: ['Jetpack Compose', 'KSP Code Generation', 'Paparazzi Screenshot Testing', 'Gradle Automation', 'CI Optimization'],
+    slidesUrl: 'https://cagdas.caglak.cc/'
+  },
+  {
     id: 'droidcon-london-2025',
     title: 'Android Screenshot Testing on Autopilot',
     conference: 'Droidcon London 2025',

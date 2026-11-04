@@ -37,7 +37,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreBlog, onExploreExperience }
           <span className="text-slate-300">|</span>
           <span className="text-slate-600">London & Global Remote</span>
           <span className="text-slate-300">|</span>
-          <span className="text-blue-600 font-semibold">Droidcon London 2025 Speaker</span>
+          <span className="text-blue-600 font-semibold">Droidcon London 2025 & DevFest Hamburg 2026 Speaker</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
@@ -174,7 +174,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreBlog, onExploreExperience }
                   </div>
                   <div>),</div>
                   <div>tests = <span className="text-emerald-700">"Paparazzi + Compose Previews"</span>,</div>
-                  <div>speakerAt = <span className="text-amber-700">"Droidcon London 2025"</span></div>
+                  <div>speakerAt = listOf(<span className="text-amber-700">"Droidcon London 2025"</span>, <span className="text-amber-700">"DevFest Hamburg 2026"</span>)</div>
                 </div>
                 <div>)</div>
               </div>

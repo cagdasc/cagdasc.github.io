@@ -82,9 +82,11 @@ export const PrintCVView: React.FC = () => {
           Conferences & Open Source
         </h2>
         <div className="space-y-2 text-xs text-gray-800">
-          <div>
-            <strong>Droidcon London 2025 Speaker:</strong> "Android Screenshot Testing on Autopilot" — Automated Paparazzi & KSP code generation for Jetpack Compose.
-          </div>
+          {talksData.map((talk) => (
+            <div key={talk.id}>
+              <strong>{talk.conference} Speaker ({talk.date}):</strong> "{talk.title}" — Automated Paparazzi & KSP code generation for Jetpack Compose previews.
+            </div>
+          ))}
           <div>
             <strong>kmp-platform-foundation & kmp-ui-foundation:</strong> Modular Kotlin Multiplatform libraries for cross-platform Android, iOS, and Desktop apps.
           </div>
