@@ -1,8 +1,23 @@
-import { useState, useRef } from 'react';
-import { X, Upload, Link2, FileText, ShieldCheck, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import {
+  X,
+  Upload,
+  Link2,
+  FileText,
+  ShieldCheck,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  ExternalLink,
+  ChevronDown,
+} from 'lucide-react';
 import type { EpgDataset, StoredPlaylist } from '../types/iptv';
 import { parseM3uContent } from '../utils/m3uParser';
-import { fetchUrlWithLocalFallback } from '../utils/localFetch';
+import {
+  fetchUrlWithLocalFallback,
+  LocalFetchError,
+  probeLocalRelayAvailable,
+} from '../utils/localFetch';
 import {
   decodePossiblyGzippedBuffer,
   parseXmltvContent,
@@ -14,6 +29,8 @@ interface ImportModalProps {
   initialTab: 'playlist' | 'epg';
   customUserAgent: string;
   onCustomUserAgentChange: (ua: string) => void;
+  corsProxyUrl: string;
+  onCorsProxyUrlChange: (proxyUrl: string) => void;
   onClose: () => void;
   onImportPlaylist: (playlist: StoredPlaylist) => Promise<void>;
   onImportEpg: (dataset: EpgDataset) => Promise<void>;
@@ -26,6 +43,8 @@ export function ImportModal({
   initialTab,
   customUserAgent,
   onCustomUserAgentChange,
+  corsProxyUrl,
+  onCorsProxyUrlChange,
   onClose,
   onImportPlaylist,
   onImportEpg,
@@ -45,18 +64,38 @@ export function ImportModal({
   const [epgUrl, setEpgUrl] = useState('');
   const [epgText, setEpgText] = useState('');
 
+  // Relay state
+  const [localRelayAvailable, setLocalRelayAvailable] = useState<boolean | null>(null);
+  const [showSelfHostedRelay, setShowSelfHostedRelay] = useState(false);
+
   // Status
   const [isBusy, setIsBusy] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [blockedContext, setBlockedContext] = useState<{
+    kind: 'playlist' | 'epg';
+    url: string;
+  } | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const m3uFileInputRef = useRef<HTMLInputElement>(null);
   const epgFileInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    let mounted = true;
+    probeLocalRelayAvailable().then((available) => {
+      if (mounted) setLocalRelayAvailable(available);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const resetMessages = () => {
     setErrorMsg(null);
+    setBlockedContext(null);
     setSuccessMsg(null);
   };
 
@@ -108,7 +147,12 @@ export function ImportModal({
       if (m3uMode === 'url') {
         const trimmedUrl = m3uUrl.trim();
         if (!trimmedUrl) throw new Error('Enter an M3U or M3U8 playlist URL.');
-        const result = await fetchUrlWithLocalFallback(trimmedUrl, customUserAgent);
+
+        const result = await fetchUrlWithLocalFallback(trimmedUrl, {
+          userAgent: customUserAgent,
+          corsProxyUrl,
+        });
+
         const text = new TextDecoder().decode(result.buffer);
         const urlName = trimmedUrl.split('/').pop()?.split('?')[0] || 'Remote M3U Playlist';
         await commitM3uString(text, 'url', urlName, trimmedUrl);
@@ -116,12 +160,19 @@ export function ImportModal({
           setSuccessMsg((prev) =>
             prev ? `${prev} (Fetched via local machine relay)` : 'Fetched via local machine relay.'
           );
+        } else if (result.viaCustomRelay) {
+          setSuccessMsg((prev) =>
+            prev ? `${prev} (Fetched via your self-hosted relay)` : 'Fetched via your self-hosted relay.'
+          );
         }
       } else if (m3uMode === 'text') {
         if (!m3uText.trim()) throw new Error('Paste your M3U playlist text first.');
         await commitM3uString(m3uText, 'text', 'Pasted Playlist');
       }
     } catch (err) {
+      if (err instanceof LocalFetchError && err.isBlockedOnStaticHost) {
+        setBlockedContext({ kind: 'playlist', url: m3uUrl.trim() });
+      }
       setErrorMsg(err instanceof Error ? err.message : 'Failed to parse M3U playlist.');
     } finally {
       setIsBusy(false);
@@ -185,7 +236,10 @@ export function ImportModal({
       if (epgMode === 'url') {
         const trimmedUrl = epgUrl.trim();
         if (!trimmedUrl) throw new Error('Enter an XMLTV or .xml.gz URL.');
-        const result = await fetchUrlWithLocalFallback(trimmedUrl, customUserAgent);
+        const result = await fetchUrlWithLocalFallback(trimmedUrl, {
+          userAgent: customUserAgent,
+          corsProxyUrl,
+        });
         const xmlText = await decodePossiblyGzippedBuffer(result.buffer, trimmedUrl);
         const urlName = trimmedUrl.split('/').pop()?.split('?')[0] || 'Browser-Fetched XMLTV';
         await commitXmltvString(xmlText, 'url', urlName);
@@ -194,11 +248,52 @@ export function ImportModal({
         await commitXmltvString(epgText, 'text', 'Pasted XMLTV Guide');
       }
     } catch (err) {
+      if (err instanceof LocalFetchError && err.isBlockedOnStaticHost) {
+        setBlockedContext({ kind: 'epg', url: epgUrl.trim() });
+      }
       setErrorMsg(err instanceof Error ? err.message : 'Failed to parse XMLTV guide.');
     } finally {
       setIsBusy(false);
     }
   };
+
+  const renderSelfHostedRelayOption = (idPrefix: string) => (
+    <div className="rounded-lg border border-white/[0.08] bg-[#0A0D12] overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setShowSelfHostedRelay((v) => !v)}
+        className="w-full px-3 py-2 flex items-center justify-between text-xs text-slate-300 hover:text-white transition-colors"
+      >
+        <span className="font-medium">
+          Self-Hosted Relay URL (optional)
+        </span>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-slate-400 transition-transform ${
+            showSelfHostedRelay ? 'rotate-180' : ''
+          }`}
+        />
+      </button>
+
+      {showSelfHostedRelay && (
+        <div className="px-3 pb-3 pt-1 border-t border-white/[0.06] space-y-1.5">
+          <label
+            htmlFor={`${idPrefix}-custom-relay`}
+            className="block text-[11px] font-medium text-slate-300"
+          >
+            Your Own Private Relay Endpoint (never uses third-party services)
+          </label>
+          <input
+            id={`${idPrefix}-custom-relay`}
+            type="url"
+            value={corsProxyUrl}
+            onChange={(e) => onCorsProxyUrlChange(e.target.value)}
+            placeholder="e.g. http://localhost:8787/?url={url} or your private worker"
+            className="w-full h-9 px-3 bg-[#12161F] border border-white/[0.1] rounded-lg font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
+          />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div
@@ -207,9 +302,9 @@ export function ImportModal({
       aria-labelledby="import-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs"
     >
-      <div className="w-full max-w-xl bg-[#12161F] border border-white/[0.1] rounded-xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-xl max-h-[90vh] flex flex-col bg-[#12161F] border border-white/[0.1] rounded-xl shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-white/[0.08] flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-white/[0.08] flex items-center justify-between gap-4 shrink-0">
           <div>
             <h2 id="import-modal-title" className="font-display text-base font-semibold text-white">
               Import Local Sources
@@ -230,7 +325,7 @@ export function ImportModal({
         </div>
 
         {/* Source Type Tabs */}
-        <div className="px-6 pt-4">
+        <div className="px-6 pt-4 shrink-0">
           <div className="grid grid-cols-2 gap-1 p-1 bg-[#0A0D12] rounded-lg border border-white/[0.06]">
             <button
               type="button"
@@ -264,7 +359,7 @@ export function ImportModal({
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 overflow-y-auto">
           {activeTab === 'playlist' ? (
             <form onSubmit={handleImportM3uSubmit} className="space-y-4">
               <div className="space-y-1.5">
@@ -328,25 +423,33 @@ export function ImportModal({
                       className="w-full h-10 px-3 bg-[#0A0D12] border border-white/[0.1] rounded-lg font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="m3u-user-agent"
-                      className="block text-xs font-medium text-slate-300"
-                    >
-                      Custom User-Agent (optional)
-                    </label>
-                    <input
-                      id="m3u-user-agent"
-                      type="text"
-                      value={customUserAgent}
-                      onChange={(e) => onCustomUserAgentChange(e.target.value)}
-                      placeholder="Browser default (or e.g. VLC/3.0.20 LibVLC/3.0.20)"
-                      className="w-full h-9 px-3 bg-[#0A0D12] border border-white/[0.1] rounded-lg font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
+
+                  {localRelayAvailable !== false && (
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="m3u-user-agent"
+                        className="block text-xs font-medium text-slate-300"
+                      >
+                        Custom User-Agent (optional, local Vite relay)
+                      </label>
+                      <input
+                        id="m3u-user-agent"
+                        type="text"
+                        value={customUserAgent}
+                        onChange={(e) => onCustomUserAgentChange(e.target.value)}
+                        placeholder="Browser default (or e.g. VLC/3.0.20 LibVLC/3.0.20)"
+                        className="w-full h-9 px-3 bg-[#0A0D12] border border-white/[0.1] rounded-lg font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  )}
+
+                  {renderSelfHostedRelayOption('m3u')}
+
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Tries direct browser fetch first. If blocked by CORS or using a custom
-                    User-Agent, automatically falls back to your local machine&apos;s Vite relay.
+                    Fetches directly from your browser with zero third-party services.{' '}
+                    {localRelayAvailable
+                      ? 'Automatically falls back to your local machine Vite relay if CORS blocks the request.'
+                      : 'If the remote host blocks CORS on static hosting, download the playlist in a new tab and drop it into Local File mode, or run LumenTV locally.'}
                   </p>
                 </div>
               )}
@@ -519,22 +622,25 @@ export function ImportModal({
                       className="w-full h-10 px-3 bg-[#0A0D12] border border-white/[0.1] rounded-lg font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label
-                      htmlFor="epg-user-agent"
-                      className="block text-xs font-medium text-slate-300"
-                    >
-                      Custom User-Agent (optional)
-                    </label>
-                    <input
-                      id="epg-user-agent"
-                      type="text"
-                      value={customUserAgent}
-                      onChange={(e) => onCustomUserAgentChange(e.target.value)}
-                      placeholder="Browser default (or e.g. VLC/3.0.20 LibVLC/3.0.20)"
-                      className="w-full h-9 px-3 bg-[#0A0D12] border border-white/[0.1] rounded-lg font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
+                  {localRelayAvailable !== false && (
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="epg-user-agent"
+                        className="block text-xs font-medium text-slate-300"
+                      >
+                        Custom User-Agent (optional, local Vite relay)
+                      </label>
+                      <input
+                        id="epg-user-agent"
+                        type="text"
+                        value={customUserAgent}
+                        onChange={(e) => onCustomUserAgentChange(e.target.value)}
+                        placeholder="Browser default (or e.g. VLC/3.0.20 LibVLC/3.0.20)"
+                        className="w-full h-9 px-3 bg-[#0A0D12] border border-white/[0.1] rounded-lg font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  )}
+                  {renderSelfHostedRelayOption('epg')}
                 </div>
               )}
 
@@ -571,9 +677,43 @@ export function ImportModal({
 
           {/* Feedback Banner */}
           {errorMsg && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-2.5 text-xs text-red-200">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-              <span className="leading-relaxed">{errorMsg}</span>
+            <div className="p-3.5 rounded-lg bg-red-500/10 border border-red-500/30 space-y-3 text-xs text-red-200">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{errorMsg}</span>
+              </div>
+
+              {blockedContext && (
+                <div className="flex flex-wrap items-center gap-2 pl-6">
+                  {blockedContext.url && (
+                    <a
+                      href={blockedContext.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Download URL in New Tab</span>
+                    </a>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (blockedContext.kind === 'playlist') {
+                        setM3uMode('file');
+                      } else {
+                        setEpgMode('file');
+                      }
+                      resetMessages();
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium bg-[#181E29] hover:bg-white/[0.1] border border-white/[0.12] text-slate-200 transition-colors"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>Use Local File</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

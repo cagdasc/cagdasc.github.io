@@ -69,6 +69,7 @@ export interface UserPreferences {
   sidebarCollapsed: boolean;
   customUserAgent: string;
   useLocalRelay: boolean;
+  corsProxyUrl: string;
 }
 
 export interface HlsQualityLevel {

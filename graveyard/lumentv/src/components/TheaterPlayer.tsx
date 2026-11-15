@@ -20,7 +20,7 @@ import {
   Shield,
 } from 'lucide-react';
 import type { Channel, EpgProgram, HlsQualityLevel } from '../types/iptv';
-import { buildLocalStreamUrl } from '../utils/localFetch';
+import { buildLocalStreamUrl, probeLocalRelayAvailable } from '../utils/localFetch';
 import {
   formatTimeShort,
   formatRemainingMinutes,
@@ -46,6 +46,7 @@ interface TheaterPlayerProps {
   useLocalRelay: boolean;
   onToggleLocalRelay: () => void;
   customUserAgent: string;
+  corsProxyUrl: string;
   onOpenImport: () => void;
 }
 
@@ -67,6 +68,7 @@ export function TheaterPlayer({
   useLocalRelay,
   onToggleLocalRelay,
   customUserAgent,
+  corsProxyUrl,
   onOpenImport,
 }: TheaterPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -84,6 +86,17 @@ export function TheaterPlayer({
   const [durationSec, setDurationSec] = useState(0);
   const [logoBroken, setLogoBroken] = useState(false);
   const [retryNonce, setRetryNonce] = useState(0);
+  const [localRelayAvailable, setLocalRelayAvailable] = useState<boolean>(false);
+
+  useEffect(() => {
+    let mounted = true;
+    probeLocalRelayAvailable().then((available) => {
+      if (mounted) setLocalRelayAvailable(available);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     setLogoBroken(false);
@@ -137,7 +150,11 @@ export function TheaterPlayer({
 
     const rawUrl = channel.streamUrl;
     const isDirectVideoFile = /\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(rawUrl);
-    const url = useLocalRelay ? buildLocalStreamUrl(rawUrl, customUserAgent) : rawUrl;
+    const canRelayStream = localRelayAvailable || Boolean(corsProxyUrl.trim());
+    const url =
+      useLocalRelay && canRelayStream
+        ? buildLocalStreamUrl(rawUrl, customUserAgent, corsProxyUrl, localRelayAvailable)
+        : rawUrl;
     const shouldTryHlsJs = Hls.isSupported() && !isDirectVideoFile;
 
     const startNativePlayback = () => {
@@ -229,7 +246,7 @@ export function TheaterPlayer({
       video.removeAttribute('src');
       video.load();
     };
-  }, [channel, retryNonce, useLocalRelay, customUserAgent]);
+  }, [channel, retryNonce, useLocalRelay, customUserAgent, corsProxyUrl, localRelayAvailable]);
 
   const togglePlayPause = useCallback(() => {
     const video = videoRef.current;
@@ -420,14 +437,14 @@ export function TheaterPlayer({
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>Retry Stream</span>
                 </button>
-                {!useLocalRelay && (
+                {!useLocalRelay && (localRelayAvailable || Boolean(corsProxyUrl.trim())) && (
                   <button
                     type="button"
                     onClick={onToggleLocalRelay}
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-200 bg-[#181E29] hover:bg-white/[0.1] border border-white/[0.12] rounded-lg transition-colors"
                   >
                     <Shield className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Retry via Local Relay</span>
+                    <span>{localRelayAvailable ? 'Retry via Local Relay' : 'Retry via CORS Proxy'}</span>
                   </button>
                 )}
               </div>
@@ -640,19 +657,33 @@ export function TheaterPlayer({
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <button
-            type="button"
-            onClick={onToggleLocalRelay}
-            title="Route stream through your local localhost Vite relay to bypass browser CORS or apply custom User-Agent"
-            className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
-              useLocalRelay
-                ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                : 'bg-[#181E29] border-white/[0.08] text-slate-300 hover:text-white hover:border-white/[0.16]'
-            }`}
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>{useLocalRelay ? 'Relay On' : 'Local Relay'}</span>
-          </button>
+          {(localRelayAvailable || Boolean(corsProxyUrl.trim())) && (
+            <button
+              type="button"
+              onClick={onToggleLocalRelay}
+              title={
+                localRelayAvailable
+                  ? 'Route stream through your local localhost Vite relay to bypass browser CORS or apply custom User-Agent'
+                  : 'Route stream through your configured custom CORS proxy URL'
+              }
+              className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${
+                useLocalRelay
+                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                  : 'bg-[#181E29] border-white/[0.08] text-slate-300 hover:text-white hover:border-white/[0.16]'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>
+                {useLocalRelay
+                  ? localRelayAvailable
+                    ? 'Relay On'
+                    : 'Proxy On'
+                  : localRelayAvailable
+                    ? 'Local Relay'
+                    : 'CORS Proxy'}
+              </span>
+            </button>
+          )}
 
           <button
             type="button"

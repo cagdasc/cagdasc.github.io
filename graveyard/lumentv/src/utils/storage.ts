@@ -18,6 +18,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   sidebarCollapsed: false,
   customUserAgent: '',
   useLocalRelay: false,
+  corsProxyUrl: '',
 };
 
 function openDatabase(): Promise<IDBDatabase> {

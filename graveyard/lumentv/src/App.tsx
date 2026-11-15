@@ -373,6 +373,7 @@ export default function App() {
                 updatePrefs((p) => ({ ...p, useLocalRelay: !p.useLocalRelay }))
               }
               customUserAgent={prefs.customUserAgent}
+              corsProxyUrl={prefs.corsProxyUrl}
               onOpenImport={() => setImportModalState({ open: true, tab: 'playlist' })}
             />
 
@@ -431,6 +432,10 @@ export default function App() {
         customUserAgent={prefs.customUserAgent}
         onCustomUserAgentChange={(customUserAgent) =>
           updatePrefs((p) => ({ ...p, customUserAgent }))
+        }
+        corsProxyUrl={prefs.corsProxyUrl}
+        onCorsProxyUrlChange={(corsProxyUrl) =>
+          updatePrefs((p) => ({ ...p, corsProxyUrl }))
         }
         onClose={() => setImportModalState((s) => ({ ...s, open: false }))}
         onImportPlaylist={handleImportPlaylist}
