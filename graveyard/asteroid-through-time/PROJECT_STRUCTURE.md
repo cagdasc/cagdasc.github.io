@@ -6,10 +6,10 @@ This document provides a comprehensive overview of the **Asteroid Chrono-Runner*
 
 ## 🗂️ Directory Tree Breakdown
 
-Located at `/games/asteroid-through-time/` within the root portfolio project:
+Located at `/graveyard/asteroid-through-time/` within the root portfolio project:
 
 ```
-games/asteroid-through-time/
+graveyard/asteroid-through-time/
 ├── README.md                      # Project overview and quick start commands
 ├── PROJECT_STRUCTURE.md           # Architecture guide and codebase map (this file)
 ├── index.html                     # HTML5 entry point & Google Fonts imports
@@ -172,7 +172,7 @@ To guarantee identical gameplay, hitboxes, and visual fidelity across all screen
 - **Particles**: Flame trails, cosmic dust, explosion embers, warp streaks.
 
 ### 12. `src/game/game.test.ts`
-- **Purpose**: Automated Node.js unit test suite (`npx tsx --test games/asteroid-through-time/src/game/game.test.ts`).
+- **Purpose**: Automated Node.js unit test suite (`npx tsx --test graveyard/asteroid-through-time/src/game/game.test.ts`).
 - **Coverage**:
   - Score to years translation & formatting.
   - Difficulty scaling bounds.
@@ -228,6 +228,6 @@ When modifying or extending this codebase:
    - Add automated test case in `src/game/game.test.ts`.
 
 3. **Running Checks Before Finishing**:
-   - Always run unit tests: `npx tsx --test games/asteroid-through-time/src/game/game.test.ts`
+   - Always run unit tests: `npx tsx --test graveyard/asteroid-through-time/src/game/game.test.ts`
    - Always run linter: `npm run lint`
    - Always verify build: `npm run build`

@@ -2,7 +2,7 @@
 
 An action-packed 2D Canvas space-cave runner game built with **React 19**, **TypeScript**, **Tailwind CSS v4**, and **HTML5 Canvas**. Navigate a faceted, rolling celestial asteroid through space caves, cosmic wormholes, spinning black holes, planetary obstacles, and space-bound prehistoric dinosaurs while traveling through millions of years of historical cosmic eras.
 
-Integrated as a dedicated Multi-Page Application (MPA) within the portfolio site, accessible at `/games/asteroid-through-time/`.
+Integrated as a dedicated Multi-Page Application (MPA) within the portfolio site, accessible at `/graveyard/asteroid-through-time/`.
 
 ---
 
@@ -49,20 +49,20 @@ Integrated as a dedicated Multi-Page Application (MPA) within the portfolio site
 ## 🛠️ Project Commands (Run from Repository Root)
 
 ```bash
-# Start local development server (serves main site & game at http://localhost:3000/games/asteroid-through-time/)
+# Start local development server (serves main site & game at http://localhost:3000/graveyard/asteroid-through-time/)
 npm run dev
 
 # Run automated game physics and logic unit tests (17 passing tests)
-npx tsx --test games/asteroid-through-time/src/game/game.test.ts
+npx tsx --test graveyard/asteroid-through-time/src/game/game.test.ts
 
 # Check TypeScript types across the entire project
 npm run lint
 
-# Build production bundle (compiles site and game into dist/)
+# Build production bundle (compiles site and apps into dist/)
 npm run build
 
-# Preview production build locally
-npm run preview
+# Build and preview production bundle on http://localhost:3000
+npm run prod
 ```
 
 ---

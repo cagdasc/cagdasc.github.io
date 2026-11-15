@@ -110,7 +110,7 @@ export const trackPageView = (path: string, title?: string): void => {
    ========================================================================= */
 
 // Navigation & Preferences
-export const trackTabSwitch = (tab: 'cv' | 'blog' | 'links'): void => {
+export const trackTabSwitch = (tab: 'cv' | 'blog' | 'links' | 'graveyard'): void => {
   trackEvent('tab_switch', { tab_name: tab });
 };
 

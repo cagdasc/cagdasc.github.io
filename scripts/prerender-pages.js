@@ -182,4 +182,33 @@ const linksIndexHtml = replaceMeta(baseTemplate, {
 fs.writeFileSync(path.join(linksDir, 'index.html'), linksIndexHtml, 'utf8');
 console.log('Generated: dist/links/index.html');
 
-console.log('All static blog and links pages pre-rendered successfully!');
+// 4. Generate /graveyard/index.html
+const graveyardDir = path.join(distDir, 'graveyard');
+if (!fs.existsSync(graveyardDir)) {
+  fs.mkdirSync(graveyardDir, { recursive: true });
+}
+
+const graveyardIndexHtml = replaceMeta(baseTemplate, {
+  title: 'App Graveyard | Cagdas Caglak',
+  description: 'Experimental web apps, games, and prototypes by Cagdas Caglak, including Asteroid Through Time and LumenTV.',
+  url: 'https://cagdas.caglak.cc/graveyard',
+  image: 'https://cagdas.caglak.cc/og/cv.png',
+  type: 'website',
+  assetPrefix: '../',
+  jsonLd: {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    'name': 'App Graveyard | Cagdas Caglak',
+    'url': 'https://cagdas.caglak.cc/graveyard',
+    'author': {
+      '@type': 'Person',
+      'name': 'Cagdas Caglak',
+      'url': 'https://cagdas.caglak.cc/'
+    }
+  }
+});
+
+fs.writeFileSync(path.join(graveyardDir, 'index.html'), graveyardIndexHtml, 'utf8');
+console.log('Generated: dist/graveyard/index.html');
+
+console.log('All static blog, links, and graveyard pages pre-rendered successfully!');

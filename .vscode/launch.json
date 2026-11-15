@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "LumenTV: Dev (Chrome)",
+      "name": "Dev (Chrome)",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3000",
@@ -10,7 +10,7 @@
       "preLaunchTask": "Dev"
     },
     {
-      "name": "LumenTV: Prod (Chrome)",
+      "name": "Prod (Chrome)",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3000",
@@ -18,7 +18,7 @@
       "preLaunchTask": "Prod"
     },
     {
-      "name": "LumenTV: Dev (Edge)",
+      "name": "Dev (Edge)",
       "type": "msedge",
       "request": "launch",
       "url": "http://localhost:3000",
@@ -26,7 +26,7 @@
       "preLaunchTask": "Dev"
     },
     {
-      "name": "LumenTV: Prod (Edge)",
+      "name": "Prod (Edge)",
       "type": "msedge",
       "request": "launch",
       "url": "http://localhost:3000",
@@ -34,7 +34,7 @@
       "preLaunchTask": "Prod"
     },
     {
-      "name": "LumenTV: Run npm run dev",
+      "name": "Run npm run dev",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",
@@ -44,7 +44,7 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "LumenTV: Run npm run prod",
+      "name": "Run npm run prod",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",

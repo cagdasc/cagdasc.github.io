@@ -35,6 +35,18 @@
           return;
         }
 
+        // Match /graveyard or /graveyard/
+        if (pathname === '/graveyard' || pathname === '/graveyard/') {
+          window.location.replace('/#graveyard');
+          return;
+        }
+
+        // Redirect legacy /games/asteroid-through-time path
+        if (/^\/games\/asteroid-through-time(\/.*)?$/.test(pathname)) {
+          window.location.replace('/graveyard/asteroid-through-time/');
+          return;
+        }
+
         // Fallback redirect to root preserving hash
         window.location.replace('/' + (hash ? hash : '#cv'));
       })();

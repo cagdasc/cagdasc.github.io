@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar';
 import { OnePageCV } from './components/OnePageCV';
 import { BlogSection } from './components/BlogSection';
 import { ArticleReader } from './components/ArticleReader';
+import { GraveyardSection } from './components/GraveyardSection';
 import { GitHubWorkflowModal } from './components/GitHubWorkflowModal';
 import { Footer } from './components/Footer';
 import { PrintCVView } from './components/PrintCVView';
@@ -12,8 +13,10 @@ import { ThemeProvider } from './context/ThemeContext';
 import { initGA, trackPageView, trackTabSwitch } from './utils/analytics';
 import { updateDocumentMeta } from './utils/meta';
 
+type ActiveTab = 'cv' | 'blog' | 'links' | 'graveyard';
+
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<'cv' | 'blog' | 'links'>('cv');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('cv');
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
   const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState<boolean>(false);
 
@@ -22,7 +25,7 @@ function AppContent() {
     initGA();
   }, []);
 
-  // Universal Route Synchronizer (Handles /blog/:slug, /links, query ?post=..., and hash #links, #blog/:slug)
+  // Universal Route Synchronizer (Handles /blog/:slug, /links, /graveyard, query ?post=..., and hash #links, #graveyard, #blog/:slug)
   useEffect(() => {
     const parseCurrentRoute = () => {
       const pathname = window.location.pathname;
@@ -36,6 +39,20 @@ function AppContent() {
 
       if (isLinksPath || isLinksHash || isLinksQuery) {
         setActiveTab('links');
+        setSelectedArticleSlug(null);
+        return;
+      }
+
+      // Check Graveyard page (/graveyard, /graveyard/, #graveyard, ?page=graveyard)
+      const isGraveyardPath = /^\/graveyard\/?$/.test(pathname);
+      const isGraveyardHash = rawHash === 'graveyard';
+      const isGraveyardQuery =
+        searchParams.get('page') === 'graveyard' ||
+        searchParams.get('view') === 'graveyard' ||
+        searchParams.has('graveyard');
+
+      if (isGraveyardPath || isGraveyardHash || isGraveyardQuery) {
+        setActiveTab('graveyard');
         setSelectedArticleSlug(null);
         return;
       }
@@ -159,6 +176,24 @@ function AppContent() {
           ]
         }
       };
+    } else if (activeTab === 'graveyard') {
+      path = '#graveyard';
+      title = 'App Graveyard | Cagdas Caglak';
+      description = 'Experimental web apps, games, and prototypes by Cagdas Caglak, including Asteroid Through Time and LumenTV.';
+      url = `${window.location.origin}/graveyard`;
+      image = `${window.location.origin}/og/cv.png`;
+      jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        'name': 'App Graveyard | Cagdas Caglak',
+        'description': description,
+        'url': url,
+        'author': {
+          '@type': 'Person',
+          'name': 'Cagdas Caglak',
+          'url': 'https://cagdas.caglak.cc/'
+        }
+      };
     } else if (activeTab === 'blog') {
       if (selectedArticleSlug && activeArticle) {
         path = `#blog/${selectedArticleSlug}`;
@@ -269,23 +304,15 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleTabChange = (tab: 'cv' | 'blog' | 'links') => {
+  const handleTabChange = (tab: ActiveTab) => {
     trackTabSwitch(tab);
     setActiveTab(tab);
-    if (tab === 'cv') {
-      setSelectedArticleSlug(null);
-      window.location.hash = 'cv';
-    } else if (tab === 'blog') {
-      setSelectedArticleSlug(null);
-      window.location.hash = 'blog';
-    } else {
-      setSelectedArticleSlug(null);
-      window.location.hash = 'links';
-    }
+    setSelectedArticleSlug(null);
+    window.location.hash = tab;
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen min-h-[100dvh] w-full overflow-x-hidden transition-colors duration-200"
       style={{
         backgroundColor: 'var(--app-bg)',
@@ -295,16 +322,16 @@ function AppContent() {
       {/* If activeTab is 'links', display the standalone Linktree page with no standard Navbar/Footer */}
       {activeTab === 'links' ? (
         <div className="animate-in fade-in duration-200 w-full">
-          <LinktreePage 
+          <LinktreePage
             onNavigateHome={() => handleTabChange('cv')}
             onNavigateBlog={() => handleTabChange('blog')}
           />
         </div>
       ) : (
         <>
-          {/* Top Fixed Navbar for main CV / Blog */}
+          {/* Top Fixed Navbar for main CV / Blog / Graveyard */}
           <Navbar
-            activeTab={activeTab === 'blog' ? 'blog' : 'cv'}
+            activeTab={activeTab === 'blog' ? 'blog' : activeTab === 'graveyard' ? 'graveyard' : 'cv'}
             setActiveTab={(t) => handleTabChange(t)}
             onOpenWorkflowModal={() => setIsWorkflowModalOpen(true)}
             activeArticleSlug={selectedArticleSlug}
@@ -315,6 +342,10 @@ function AppContent() {
             {activeTab === 'cv' ? (
               <div className="animate-in fade-in duration-200">
                 <OnePageCV onGoToBlog={() => handleTabChange('blog')} />
+              </div>
+            ) : activeTab === 'graveyard' ? (
+              <div className="animate-in fade-in duration-200">
+                <GraveyardSection />
               </div>
             ) : (
               <div className="animate-in fade-in duration-200">
@@ -355,4 +386,3 @@ export default function App() {
     </ThemeProvider>
   );
 }
-

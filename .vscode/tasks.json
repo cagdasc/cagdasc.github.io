@@ -61,7 +61,7 @@
           ],
           "background": {
             "activeOnStart": true,
-            "beginsPattern": "vite.*",
+            "beginsPattern": "vite.*|VITE v.*",
             "endsPattern": "Local:\\s+http://.*"
           }
         }

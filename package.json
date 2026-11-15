@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build && node scripts/prerender-pages.js",
+    "prod": "npm run build && vite preview --port=3000 --host=0.0.0.0",
     "generate-og": "node scripts/generate-og-images.js",
-    "preview": "vite preview",
+    "preview": "vite preview --port=3000 --host=0.0.0.0",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
   },
@@ -16,6 +17,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
+    "hls.js": "^1.7.4",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",
