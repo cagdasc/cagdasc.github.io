@@ -1,0 +1,6 @@
+{
+  "name": "LumenTV",
+  "description": "Privacy-first, browser-local web IPTV player with M3U playlist support, local XMLTV EPG parsing, categories, favorites, and search.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

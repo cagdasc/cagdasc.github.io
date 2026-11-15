@@ -1,0 +1,98 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Install Dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev",
+      "type": "npm",
+      "script": "dev",
+      "dependsOn": "Install Dependencies",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "VITE v.*|vite.*",
+            "endsPattern": "Local:\\s+http://.*"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Prod",
+      "type": "npm",
+      "script": "prod",
+      "dependsOn": "Install Dependencies",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "vite.*",
+            "endsPattern": "Local:\\s+http://.*"
+          }
+        }
+      ]
+    },
+    {
+      "label": "Build",
+      "type": "npm",
+      "script": "build",
+      "dependsOn": "Install Dependencies",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Typecheck",
+      "type": "npm",
+      "script": "lint",
+      "dependsOn": "Install Dependencies",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": ["$tsc"]
+    }
+  ]
+}
