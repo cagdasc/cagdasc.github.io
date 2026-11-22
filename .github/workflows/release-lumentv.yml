@@ -1,0 +1,89 @@
+name: Release LumenTV Standalone
+
+on:
+  push:
+    tags:
+      - 'lumentv-v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag name (e.g. lumentv-v1.0.0)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check workspace
+        run: npm run lint
+
+      - name: Build LumenTV web bundle
+        run: npx vite build --config graveyard/lumentv/vite.standalone.config.ts
+
+      - name: Compile standalone binaries for macOS, Linux, and Windows
+        run: |
+          OUT_DIR="$PWD/release-artifacts"
+          mkdir -p "$OUT_DIR"
+
+          targets=(
+            "bun-darwin-arm64:lumentv-macos-arm64:tar.gz:lumentv"
+            "bun-darwin-x64:lumentv-macos-x64:tar.gz:lumentv"
+            "bun-linux-x64:lumentv-linux-x64:tar.gz:lumentv"
+            "bun-linux-arm64:lumentv-linux-arm64:tar.gz:lumentv"
+            "bun-windows-x64:lumentv-windows-x64:zip:lumentv.exe"
+          )
+
+          for entry in "${targets[@]}"; do
+            IFS=':' read -r target artifact ext bin_name <<< "$entry"
+            work="dist-lumentv/pkg-${artifact}"
+            mkdir -p "$work"
+            node scripts/build-lumentv.mjs --skip-vite --target="$target" --outfile="$work/$bin_name"
+
+            if [ "$ext" = "tar.gz" ]; then
+              chmod +x "$work/$bin_name"
+              tar -C "$work" -czf "$OUT_DIR/${artifact}.tar.gz" "$bin_name"
+            else
+              (cd "$work" && zip -q "$OUT_DIR/${artifact}.zip" "$bin_name")
+            fi
+          done
+
+          (cd "$OUT_DIR" && sha256sum * > SHA256SUMS.txt)
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumentv-binaries
+          path: release-artifacts/*
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/lumentv-v') || inputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag != '' && inputs.tag || github.ref_name }}
+          name: LumenTV ${{ inputs.tag != '' && inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          files: |
+            release-artifacts/*.tar.gz
+            release-artifacts/*.zip
+            release-artifacts/SHA256SUMS.txt

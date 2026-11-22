@@ -92,8 +92,11 @@ npm run preview
 # Run Asteroid Through Time unit tests (17 tests)
 npx tsx --test graveyard/asteroid-through-time/src/game/game.test.ts
 
-# Clean dist/
+# Clean dist/ and dist-lumentv/
 npm run clean
+
+# Compile standalone local LumenTV executable (requires Bun) into dist-lumentv/
+npm run lumentv:build
 ```
 
 ---
@@ -124,4 +127,6 @@ Root `.vscode/launch.json` and `.vscode/tasks.json` provide one-click configurat
 
 ## Deployment
 
-Pushes to `main` or `master` trigger `.github/workflows/deploy.yml`, which runs `npm ci`, executes `npm run build`, and deploys `./dist` to GitHub Pages.
+- **Portfolio & Graveyard Web Site**: Pushes to `main` or `master` trigger `.github/workflows/deploy.yml`, which runs `npm ci`, executes `npm run build`, and deploys `./dist` to GitHub Pages.
+- **LumenTV Standalone Releases**: Pushing a tag matching `lumentv-v*` (e.g. `lumentv-v1.0.0`) triggers `.github/workflows/release-lumentv.yml`, which compiles standalone binaries for macOS, Linux, and Windows and publishes a GitHub Release.
+

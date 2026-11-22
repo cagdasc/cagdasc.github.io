@@ -7,9 +7,10 @@
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build && node scripts/prerender-pages.js",
     "prod": "npm run build && vite preview --port=3000 --host=0.0.0.0",
+    "lumentv:build": "node scripts/build-lumentv.mjs",
     "generate-og": "node scripts/generate-og-images.js",
     "preview": "vite preview --port=3000 --host=0.0.0.0",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist dist-lumentv",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

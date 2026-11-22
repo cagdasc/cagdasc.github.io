@@ -30,3 +30,45 @@ npm run prod
 # Type-check workspace
 npm run lint
 ```
+
+---
+
+## Standalone Local Executable
+
+LumenTV can also be compiled into a self-contained single executable (`dist-lumentv/lumentv` or `dist-lumentv/lumentv.exe`) that embeds the built web UI and runs the local `/__local_fetch` and `/__local_stream` relay on `127.0.0.1` without needing Node/Vite installed at runtime. It automatically opens in a chromeless Chromium `--app=` window (Chrome/Edge/Brave) or falls back to your default browser so native media codecs work seamlessly.
+
+### Build Locally (Requires Bun + Node.js)
+
+```bash
+# Compile standalone binary for your current OS into dist-lumentv/
+npm run lumentv:build
+
+# Run it
+./dist-lumentv/lumentv
+
+# Or build a tiny ~1.5 MB Bun JS bundle instead of a full binary
+node scripts/build-lumentv.mjs --bundle-only
+bun run dist-lumentv/lumentv.mjs
+```
+
+### CLI Options
+
+| Flag | Description |
+| :--- | :--- |
+| `-p, --port <number>` | Preferred local port (default: `4173`, auto-falls back to a free port) |
+| `--no-open` | Start the local server without opening a browser window |
+| `--browser` | Open in a standard browser tab instead of app window mode |
+| `--lan` | Bind to `0.0.0.0` instead of `127.0.0.1` |
+| `-h, --help` | Print CLI help |
+
+---
+
+## Automated Version Releases (`lumentv-v*`)
+
+Pushing any tag matching `lumentv-v*` (or running the **Release LumenTV Standalone** workflow manually in GitHub Actions) builds binaries for macOS (`arm64`, `x64`), Linux (`x64`, `arm64`), and Windows (`x64`), generates `SHA256SUMS.txt`, and publishes a GitHub Release independently of the main portfolio deploy:
+
+```bash
+git tag lumentv-v1.0.0
+git push origin lumentv-v1.0.0
+```
+
