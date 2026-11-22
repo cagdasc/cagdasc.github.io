@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -113,10 +115,55 @@ function generateEntryModules() {
   console.log(`Embedded ${files.length} LumenTV static assets into ${path.relative(rootDir, generatedAssetsPath)}`);
 }
 
+function ensureRootDependencies(requireFromRoot) {
+  const required = ['vite', 'hls.js'];
+  const missing = required.filter((pkg) => {
+    try {
+      requireFromRoot.resolve(pkg);
+      return false;
+    } catch {
+      return true;
+    }
+  });
+
+  if (missing.length > 0) {
+    console.error(
+      `Missing root dependencies in node_modules: ${missing.join(', ')}.\n` +
+        'Run "npm install" (or "npm ci") in the repository root first, then re-run "npm run lumentv:build".'
+    );
+    process.exit(1);
+  }
+}
+
+function resolveBunExecutable() {
+  const candidates = [
+    process.env.BUN_BIN,
+    'bun',
+    path.join(os.homedir(), '.bun', 'bin', process.platform === 'win32' ? 'bun.exe' : 'bun'),
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    try {
+      execFileSync(candidate, ['--version'], { stdio: 'ignore' });
+      return candidate;
+    } catch {
+      // try next candidate
+    }
+  }
+
+  console.error(
+    'Bun runtime was not found on PATH (or ~/.bun/bin/bun).\n' +
+      'Install Bun (https://bun.sh) to compile the standalone LumenTV binary.'
+  );
+  process.exit(1);
+}
+
 function main() {
   const opts = parseCliFlags(process.argv.slice(2));
+  const requireFromRoot = createRequire(path.join(rootDir, 'package.json'));
 
   if (!opts.skipVite) {
+    ensureRootDependencies(requireFromRoot);
     console.log('Building LumenTV standalone web bundle...');
     execFileSync(
       'npx',
@@ -127,11 +174,13 @@ function main() {
 
   generateEntryModules();
 
+  const bunBin = resolveBunExecutable();
+
   if (opts.bundleOnly) {
     const bundlePath = opts.outfile || path.join(outBaseDir, 'lumentv.mjs');
     fs.mkdirSync(path.dirname(bundlePath), { recursive: true });
     execFileSync(
-      'bun',
+      bunBin,
       ['build', generatedEntryPath, '--target=bun', '--minify', '--outfile', bundlePath],
       { cwd: rootDir, stdio: 'inherit' }
     );
@@ -151,7 +200,7 @@ function main() {
   }
 
   console.log(`Compiling LumenTV executable (${opts.target || 'host target'})...`);
-  execFileSync('bun', bunArgs, { cwd: rootDir, stdio: 'inherit' });
+  execFileSync(bunBin, bunArgs, { cwd: rootDir, stdio: 'inherit' });
   console.log(`Built executable: ${path.relative(rootDir, binaryPath)}`);
 }
 

@@ -1,8 +1,13 @@
 import http from 'node:http';
+import dns from 'node:dns';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { handleLocalFetchRequest, handleLocalStreamRequest } from './relay';
+
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 export interface EmbeddedAssetEntry {
   contentType: string;
